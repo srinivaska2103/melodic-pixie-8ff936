@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" 
+      x-data="{ 
+        count: 10, 
+        darkMode: true, 
+        isRtl: false,
+        toggleDir() { this.isRtl = !this.isRtl; document.documentElement.dir = this.isRtl ? 'rtl' : 'ltr' }
+      }" 
+      :class="{'dark': darkMode}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="Assets/scuba.png">
+    <title>404 - Underwater Navigation | DeepBlue</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { 
+                extend: { 
+                    colors: { 
+                        ocean: { 400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7' } 
+                    } 
+                } 
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none !important; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-25px) rotate(8deg); }
+        }
+        .diver-animate { animation: float 6s ease-in-out infinite; }
+        .bubble-stream { position: absolute; bottom: -20px; background: currentColor; border-radius: 50%; pointer-events: none; opacity: 0.2; }
+    </style>
+</head>
+<body class="transition-colors duration-700 font-sans h-screen overflow-hidden flex items-center justify-center"
+      :class="darkMode ? 'bg-slate-950 text-white' : 'bg-ocean-50 text-slate-900'"
+      x-init="setInterval(() => { if(count > 0) count--; else window.location.href='index.html' }, 1000)">
+
+    <div class="fixed top-8 right-8 z-50 flex gap-4" :class="isRtl ? 'right-auto left-8' : 'right-8'">
+        <button @click="toggleDir()" 
+                class="p-3 rounded-2xl backdrop-blur-xl border border-white/20 bg-white/10 hover:bg-white/20 transition-all shadow-xl">
+            <span class="text-xs font-black uppercase tracking-widest" x-text="isRtl ? 'LTR' : 'RTL'"></span>
+        </button>
+
+        <button @click="darkMode = !darkMode" 
+                class="p-3 rounded-2xl backdrop-blur-xl border border-white/20 bg-white/10 hover:bg-white/20 transition-all shadow-xl">
+            <span x-show="darkMode" x-cloak>☀️</span>
+            <span x-show="!darkMode" x-cloak>🌙</span>
+        </button>
+    </div>
+
+    <div class="absolute inset-0 z-0 pointer-events-none">
+        <div class="absolute inset-0 transition-opacity duration-1000"
+             :class="darkMode ? 'bg-gradient-to-b from-ocean-900/20 to-slate-950' : 'bg-gradient-to-b from-ocean-200 to-ocean-50'"></div>
+        
+        <template x-for="i in 12">
+            <div class="bubble-stream animate-bounce" 
+                 :class="darkMode ? 'text-white' : 'text-ocean-400'"
+                 :style="`left: ${Math.random() * 100}%; width: ${Math.random() * 15}px; height: ${Math.random() * 15}px; animation-duration: ${3 + Math.random() * 5}s;` ">
+            </div>
+        </template>
+    </div>
+
+    <div class="relative z-10 text-center px-6 max-w-2xl">
+        <div class="mb-12 diver-animate inline-block drop-shadow-2xl">
+            <div class="relative">
+                <span class="text-9xl block">🤿</span>
+                <div class="absolute -top-4 -right-4 w-8 h-8 bg-ocean-500 rounded-full animate-ping opacity-20"></div>
+            </div>
+        </div>
+
+        <h1 class="text-9xl md:text-[12rem] font-black absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 select-none opacity-5 tracking-tighter"
+            :class="darkMode ? 'text-white' : 'text-ocean-900'">
+            404
+        </h1>
+
+        <div class="space-y-8">
+            <h2 class="text-5xl md:text-7xl font-black tracking-tighter leading-none"
+                :class="darkMode ? 'text-white' : 'text-slate-900'">
+                Lost in the <span class="text-ocean-500">Abyss?</span>
+            </h2>
+            
+            <p class="text-lg md:text-xl font-medium max-w-md mx-auto leading-relaxed"
+               :class="darkMode ? 'text-slate-400' : 'text-slate-600'">
+                Even the best navigators lose their way. We are guiding you back to the surface.
+            </p>
+
+            <div class="flex flex-col items-center gap-4">
+                <div class="w-48 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div class="h-full bg-ocean-500 transition-all duration-1000 ease-linear"
+                         :style="`width: ${count * 10}%` "></div>
+                </div>
+                <p class="text-[10px] font-black uppercase tracking-[0.4em] opacity-60">
+                    Ascending in <span x-text="count"></span>s
+                </p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6">
+                <a href="index.html" 
+                   class="w-full sm:w-auto px-12 py-5 bg-ocean-500 text-white rounded-2xl font-black uppercase text-xs tracking-widest shadow-2xl shadow-ocean-500/30 hover:bg-ocean-600 hover:-translate-y-1 transition-all active:scale-95">
+                    Surface Now
+                </a>
+                <a href="contact.html" 
+                   class="w-full sm:w-auto px-12 py-5 border-2 rounded-2xl font-black uppercase text-xs tracking-widest transition-all"
+                   :class="darkMode ? 'border-white/10 hover:bg-white/5 text-white' : 'border-slate-200 hover:bg-slate-100 text-slate-900'">
+                    Distress Signal
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed bottom-12 left-12 transition-all duration-1000 hidden lg:block"
+         :class="darkMode ? 'text-white/10' : 'text-ocean-900/10'"
+         :style="isRtl ? 'left: auto; right: 12rem;' : ''">
+        <svg class="w-40 h-40 animate-[spin_20s_linear_infinite]" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" stroke-width="1"/>
+            <path d="M50 2 L50 98 M2 50 L98 50" stroke="currentColor" stroke-width="0.5"/>
+            <path d="M50 10 L55 50 L50 90 L45 50 Z" fill="currentColor"/>
+        </svg>
+    </div>
+
+</body>
+</html>

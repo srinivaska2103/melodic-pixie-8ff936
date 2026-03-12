@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en" 
+      x-data="{ 
+        darkMode: localStorage.getItem('theme') === 'dark', 
+        isRtl: localStorage.getItem('dir') === 'rtl', 
+        mobileMenu: false, 
+        profileDropdown: false,
+        toggleTheme() {
+            this.darkMode = !this.darkMode;
+            localStorage.setItem('theme', this.darkMode ? 'dark' : 'light');
+        },
+        toggleDir() {
+            this.isRtl = !this.isRtl;
+            localStorage.setItem('dir', this.isRtl ? 'rtl' : 'ltr');
+        }
+      }" 
+      :class="{'dark': darkMode}" 
+      :dir="isRtl ? 'rtl' : 'ltr'">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="icon" href="Assets/scuba.png">
+    <title>DeepBlue | Scuba Diving & Certifications</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: { ocean: { 50: '#f0f9ff', 400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7', 900: '#0c4a6e' } }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none !important; }
+        body { font-family: 'Inter', sans-serif; transition: background-color 0.3s ease; }
+        .glass { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    </style>
+</head>
+<body class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition-all">
+
+<nav class="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 glass border-b dark:border-slate-800" 
+     x-data="{ 
+        activeTab: sessionStorage.getItem('activeNav') || 'Home',
+        profileDropdown: false,
+        mobileDashOpen: false,
+        setActive(name) {
+            this.activeTab = name;
+            sessionStorage.setItem('activeNav', name);
+        }
+     }">
+    <!-- <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-20 items-center">
+            
+            <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer group">
+                <div class="w-10 h-10 bg-ocean-500 rounded-lg flex items-center justify-center text-white shadow-lg group-hover:rotate-12 transition-transform">
+                    <a href="index.html" @click="setActive('Home')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                        </svg>
+                    </a>
+                </div>
+                <span class="text-2xl font-black tracking-tighter bg-gradient-to-r from-blue-600 to-ocean-400 bg-clip-text text-transparent uppercase italic">
+                    DeepBlue
+                </span>
+            </div>
+
+            <div class="hidden lg:flex items-center space-x-1 rtl:space-x-reverse">
+                <template x-for="link in [
+                    { name: 'Home', url: 'index.html' }, 
+                    { name: 'Home2', url: 'home2.html' }, 
+                    { name: 'Courses', url: 'course.html' }, 
+                    { name: 'Instructors', url: 'instructors.html' }, 
+                    { name: 'Resources', url: 'about.html' },
+                    { name: 'Contact us', url: 'contact.html' }
+                ]">
+                    <a :href="link.url" 
+                       @click="setActive(link.name)"
+                       :class="activeTab === link.name ? 'text-ocean-500 bg-ocean-50 dark:bg-ocean-900/20' : 'text-slate-600 dark:text-slate-300 hover:text-ocean-500 hover:bg-ocean-50 dark:hover:bg-slate-800'"
+                       class="px-4 py-2 rounded-xl font-bold text-sm transition-all duration-200" 
+                       x-text="link.name"></a>
+                </template>
+
+                <div class="relative" @click.away="profileDropdown = false">
+                    <button @click="profileDropdown = !profileDropdown"
+                            :class="activeTab === 'Dashboard' ? 'text-ocean-500 bg-ocean-50 dark:bg-ocean-900/20' : 'text-slate-600 dark:text-slate-300'"
+                            class="flex items-center gap-1 px-4 py-2 rounded-xl font-bold text-sm hover:text-ocean-500 transition-all">
+                        Dashboard
+                        <svg class="w-4 h-4 transition-transform" :class="profileDropdown ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="profileDropdown" x-cloak x-transition class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border dark:border-slate-700 py-2 z-50">
+                        <a href="user.html" @click="setActive('Dashboard')" class="flex items-center gap-2 px-4 py-2 hover:bg-ocean-50 dark:hover:bg-slate-700 text-sm font-bold">
+                            👤 User Panel
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-1.5 sm:gap-4">
+                
+                <button @click="toggleDir()" 
+                        class="flex items-center justify-center min-w-[42px] text-[9px] font-black border-2 border-slate-200 dark:border-slate-700 px-2 py-1.5 rounded-lg uppercase hover:bg-ocean-500 hover:text-white transition-all active:scale-90">
+                    <span x-text="isRtl ? 'LTR' : 'RTL'"></span>
+                </button>
+
+                <button @click="toggleTheme()" 
+                        class="p-2.5 rounded-xl border-2 border-transparent bg-slate-100 dark:bg-slate-800 hover:bg-ocean-500 hover:text-white transition-all active:scale-90">
+                    <span x-show="!darkMode" x-cloak>🌙</span>
+                    <span x-show="darkMode" x-cloak>☀️</span>
+                </button>
+
+                <a href="login.html" class="hidden sm:block bg-ocean-500 text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:shadow-lg transition-all">Login</a>
+                
+                <button @click="mobileMenu = !mobileMenu" class="lg:hidden p-2 text-slate-600 dark:text-slate-300">
+                    <svg x-show="!mobileMenu" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    <svg x-show="mobileMenu" x-cloak class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>
+    </div> -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between h-20 items-center gap-2">
+        
+        <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer group">
+            <div class="w-9 h-9 lg:w-10 lg:h-10 bg-ocean-500 rounded-lg flex items-center justify-center text-white shadow-lg group-hover:rotate-12 transition-transform">
+                <a href="index.html" @click="setActive('Home')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                    </svg>
+                </a>
+            </div>
+            <span class="text-xl lg:text-2xl font-black tracking-tighter bg-gradient-to-r from-blue-600 to-ocean-400 bg-clip-text text-transparent uppercase italic">
+                DeepBlue
+            </span>
+        </div>
+
+        <div class="hidden lg:flex items-center space-x-0.5 xl:space-x-1 rtl:space-x-reverse">
+            <template x-for="link in [
+                { name: 'Home', url: 'index.html' }, 
+                { name: 'Home2', url: 'home2.html' }, 
+                { name: 'Courses', url: 'course.html' }, 
+                { name: 'Instructors', url: 'instructors.html' }, 
+                { name: 'Resources', url: 'about.html' },
+                { name: 'Contact', url: 'contact.html' }
+            ]">
+                <a :href="link.url" 
+                   @click="setActive(link.name)"
+                   :class="activeTab === link.name ? 'text-ocean-500 bg-ocean-50 dark:bg-ocean-900/20' : 'text-slate-600 dark:text-slate-300 hover:text-ocean-500 hover:bg-ocean-50 dark:hover:bg-slate-800'"
+                   class="px-2.5 xl:px-4 py-2 rounded-xl font-bold text-[13px] xl:text-sm transition-all duration-200 whitespace-nowrap" 
+                   x-text="link.name"></a>
+            </template>
+
+            <div class="relative" @click.away="profileDropdown = false">
+                <button @click="profileDropdown = !profileDropdown"
+                        :class="activeTab === 'Dashboard' ? 'text-ocean-500 bg-ocean-50 dark:bg-ocean-900/20' : 'text-slate-600 dark:text-slate-300'"
+                        class="flex items-center gap-1 px-2.5 xl:px-4 py-2 rounded-xl font-bold text-[13px] xl:text-sm hover:text-ocean-500 transition-all">
+                    Dashboard
+                    <svg class="w-4 h-4 transition-transform" :class="profileDropdown ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div x-show="profileDropdown" x-cloak x-transition class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border dark:border-slate-700 py-2 z-50">
+                    <a href="user.html" @click="setActive('Dashboard')" class="flex items-center gap-2 px-4 py-2 hover:bg-ocean-50 dark:hover:bg-slate-700 text-sm font-bold">
+                        👤 User Panel
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 xl:gap-4 shrink-0">
+            <button @click="toggleDir()" 
+                    class="flex items-center justify-center min-w-[38px] xl:min-w-[42px] text-[8px] xl:text-[9px] font-black border-2 border-slate-200 dark:border-slate-700 px-2 py-1.5 rounded-lg uppercase hover:bg-ocean-500 hover:text-white transition-all active:scale-90">
+                <span x-text="isRtl ? 'LTR' : 'RTL'"></span>
+            </button>
+
+            <button @click="toggleTheme()" 
+                    class="p-2 xl:p-2.5 rounded-xl border-2 border-transparent bg-slate-100 dark:bg-slate-800 hover:bg-ocean-500 hover:text-white transition-all active:scale-90">
+                <span x-show="!darkMode" class="text-sm xl:text-base">🌙</span>
+                <span x-show="darkMode" class="text-sm xl:text-base">☀️</span>
+            </button>
+
+            <a href="login.html" class="hidden sm:block bg-ocean-500 text-white px-4 xl:px-6 py-2.5 rounded-xl font-bold text-[13px] xl:text-sm hover:shadow-lg transition-all whitespace-nowrap">Login</a>
+            
+            <button @click="mobileMenu = !mobileMenu" class="lg:hidden p-2 text-slate-600 dark:text-slate-300">
+                <svg x-show="!mobileMenu" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                <svg x-show="mobileMenu" x-cloak class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+    </div>
+</div>
+    <div x-show="mobileMenu" 
+         x-cloak
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 -translate-y-10"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         class="lg:hidden fixed inset-x-0 top-20 bg-white dark:bg-slate-900 border-b dark:border-slate-800 shadow-2xl z-[200] glass">
+        
+        <div class="px-6 pt-4 pb-10 space-y-2 max-h-[80vh] overflow-y-auto">
+            <template x-for="link in [
+                {n: 'Home', u: 'index.html'}, 
+                {n: 'Home2', u: 'home2.html'}, 
+                {n: 'Courses', u: 'course.html'}, 
+                {n: 'Instructors', u: 'instructors.html'}, 
+                {n: 'Resources', u: 'about.html'},
+                {n: 'Contact us', u: 'contact.html'}
+            ]">
+                <a :href="link.u" 
+                   @click="setActive(link.n)"
+                   :class="activeTab === link.n ? 'text-ocean-500 bg-ocean-50 dark:bg-ocean-900/20 font-black' : 'text-slate-600 dark:text-slate-300 font-bold'"
+                   class="block px-4 py-4 rounded-2xl hover:bg-ocean-50 transition-all uppercase text-xs tracking-widest">
+                    <span x-text="link.n"></span>
+                </a>
+            </template>
+
+            <div class="rounded-2xl border dark:border-slate-800">
+                <button @click="mobileDashOpen = !mobileDashOpen" 
+                        :class="activeTab === 'Dashboard' ? 'text-ocean-500' : ''"
+                        class="w-full flex justify-between items-center px-4 py-4 font-black uppercase text-xs tracking-widest">
+                    Dashboard Suite
+                    <svg class="w-4 h-4 transition-transform" :class="mobileDashOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div x-show="mobileDashOpen" x-transition class="px-4 pb-4 space-y-2">
+                    <a href="user.html" @click="setActive('Dashboard')" class="block p-4 rounded-xl bg-slate-50 dark:bg-white/5 text-[10px] font-black uppercase tracking-widest">📊 Diver Panel</a>
+                </div>
+            </div>
+
+            <div class="pt-6 mt-4 border-t dark:border-slate-800 text-center">
+                <a href="login.html" class="block w-full bg-ocean-500 text-white py-5 rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg">Enter Terminal</a>
+            </div>
+        </div>
+    </div>
+</nav>
+  <!-- <nav class="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b dark:border-slate-800" 
+     x-data="{ activeTab: 'Home', profileDropdown: false }">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-20 items-center">
+            
+           <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer group">
+    <div class="w-10 h-10 bg-ocean-500 rounded-lg flex items-center justify-center text-white shadow-lg shadow-ocean-500/20 group-hover:scale-110 transition-transform">
+        <a href="/index.html">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+        </svg>
+        </a>
+      
+    </div>
+    
+    <span class="text-2xl font-black tracking-tight 
+                 bg-gradient-to-r from-blue-600 to-cyan-400 
+                 bg-clip-text text-transparent 
+                 drop-shadow-sm 
+                 selection:bg-ocean-100">
+        DeepBlue
+    </span>
+</div>
+
+            <div class="hidden lg:flex items-center space-x-1 rtl:space-x-reverse">
+                <template x-for="link in [
+        { name: 'Home', url: 'index.html' }, 
+         { name: 'Home2', url: 'home2.html' },
+        { name: 'Courses', url: 'course.html' }, 
+        { name: 'Instructors', url: 'instructors.html' }, 
+        { name: 'Resources', url: 'about.html' },
+      
+         { name: 'Contact', url: 'contact.html'}
+    ]">
+        <a :href="link.url" 
+           @click="activeTab = link.name"
+           :class="activeTab === link.name ? 'text-ocean-500 bg-ocean-50 dark:bg-ocean-900/20' : 'text-slate-600 dark:text-slate-300 hover:text-ocean-500 hover:bg-ocean-50 dark:hover:bg-slate-800'"
+           class="px-4 py-2 rounded-lg font-medium transition-all duration-200" 
+           x-text="link.name"></a>
+    </template>
+               
+                
+                <div class="relative" @click.away="profileDropdown = false">
+                    <button @click="profileDropdown = !profileDropdown" 
+                            class="flex items-center gap-1 px-4 py-2 rounded-lg font-medium text-slate-600 dark:text-slate-300 hover:text-ocean-500 transition-all">
+                        Dashboard
+                        <svg class="w-4 h-4 transition-transform" :class="profileDropdown ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="profileDropdown" 
+                         x-transition:enter="transition ease-out duration-100"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border dark:border-slate-700 py-2 z-50">
+                        <a href="/user.html" class="flex items-center gap-2 px-4 py-2 hover:bg-ocean-50 dark:hover:bg-slate-700">
+                            <span class="text-xs">👤</span> User Panel
+                        </a>
+                        <a href="/instructor.html" class="flex items-center gap-2 px-4 py-2 hover:bg-ocean-50 dark:hover:bg-slate-700 border-t dark:border-slate-700">
+                            <span class="text-xs">⚙️</span> Admin Portal
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-4">
+                <button @click="darkMode = !darkMode" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none">
+                    <span x-show="!darkMode" class="text-xl">🌙</span>
+                    <span x-show="darkMode" class="text-xl">☀️</span>
+                </button>
+
+                <button @click="isRtl = !isRtl" class="flex items-center justify-center min-w-[45px] text-[10px] font-black border-2 border-slate-200 dark:border-slate-700 px-2 py-1.5 rounded-md uppercase hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                    <span x-text="isRtl ? 'LTR' : 'RTL'"></span>
+                </button>
+
+                <a href="#" class="hidden sm:block bg-ocean-500 text-white px-6 py-2 rounded-full font-bold hover:bg-ocean-600 hover:shadow-lg hover:shadow-ocean-500/30 transition-all">Login</a>
+
+                <button @click="mobileMenu = !mobileMenu" class="lg:hidden p-2 text-slate-600 dark:text-slate-300 focus:outline-none">
+                    <svg x-show="!mobileMenu" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    <svg x-show="mobileMenu" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div x-show="mobileMenu" 
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 -translate-y-4"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         @click.away="mobileMenu = false"
+         class="lg:hidden bg-white dark:bg-slate-900 border-b dark:border-slate-800 shadow-2xl overflow-hidden">
+        <div class="px-4 pt-2 pb-6 space-y-1">
+            <a href="/index.html" class="block px-4 py-3 rounded-xl bg-ocean-50 dark:bg-ocean-900/20 text-ocean-500 font-bold">Home</a>
+            <a href="/home2.html" class="block px-4 py-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Home2</a>
+            <a href="/course.html" class="block px-4 py-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Courses</a>
+            <a href="/Instructors.html" class="block px-4 py-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Instructors</a>
+            <a href="/about.html" class="block px-4 py-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Resources</a>
+            
+            <div class="pt-4 mt-4 border-t dark:border-slate-800">
+                <p class="px-4 text-xs font-bold uppercase text-slate-400 mb-2">Account Settings</p>
+                <a href="/user.html" class="block px-4 py-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800">User Dashboard</a>
+                <a href="/instructor.html" class="block px-4 py-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 text-red-400">Admin Portal</a>
+                <a href="/login.html" class="mt-4 block text-center bg-ocean-500 text-white py-4 rounded-xl font-bold">Login</a>
+            </div>
+              <a href="/contact.html" class="block px-4 py-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Contact US</a>
+        </div>
+    </div>
+</nav> -->
+<header class="relative min-h-[90vh] lg:h-[85vh] flex items-center overflow-hidden bg-slate-900">
+    <div class="absolute inset-0 z-0">
+        <img src="Assets/indeximg10" 
+             class="w-full h-full object-cover brightness-[0.4] lg:brightness-50" 
+             alt="Scuba Diving">
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-slate-900/20 to-slate-900/80 lg:hidden"></div>
+    </div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-6 py-20 lg:py-0 w-full">
+        <div class="max-w-4xl">
+            <span class="inline-block px-4 py-2 rounded-full bg-ocean-500/20 border border-ocean-500/30 text-ocean-400 text-sm font-bold mb-6 tracking-wide uppercase">
+                Global Scuba Excellence
+            </span>
+            
+            <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-[1.1] mb-6">
+                Explore the ocean, learn scuba diving, and earn 
+                <span class="text-ocean-400">globally recognised</span> certifications.
+            </h1>
+
+            <p class="text-lg sm:text-xl md:text-2xl text-slate-200 mb-10 max-w-2xl leading-relaxed opacity-90">
+                Start your underwater adventure with expert instructors and safe, unforgettable dive experiences.
+            </p>
+
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                <a href="booking.html">
+<button class="bg-ocean-500 hover:bg-ocean-600 text-white px-8 py-4 rounded-2xl font-bold text-lg transition-all shadow-lg shadow-ocean-500/25 text-center">
+                    Book a Dive Course
+                </button>
+                </a>
+                <a href="comingsoon.html">
+  <button class="bg-white/10 backdrop-blur-md hover:bg-white/20 text-white px-8 py-4 rounded-2xl font-bold text-lg transition-all border border-white/30 text-center">
+                    Explore Guided Trips
+                </button>
+                </a>
+              
+            </div>
+
+            
+        </div>
+    </div>
+</header>
+<section id="team" class="py-24 bg-white dark:bg-slate-950 transition-colors duration-500" x-data="{ active: null }">
+    <div class="max-w-7xl mx-auto px-6">
+        
+        <div class="flex flex-col md:flex-row justify-between items-end gap-8 mb-20">
+            <div class="max-w-2xl">
+                <span class="text-ocean-500 font-black uppercase text-[10px] tracking-[0.5em] mb-4 block underline decoration-ocean-500/30 underline-offset-8">The Human Element</span>
+                <h2 class="text-4xl md:text-6xl font-black tracking-tighter text-slate-900 dark:text-white">Meet Your <span class="text-ocean-500">Mentors</span></h2>
+            </div>
+            <p class="text-slate-500 dark:text-slate-400 font-medium max-w-sm text-right leading-relaxed hidden lg:block">
+                Our team represents over 30,000 combined hours underwater across every continent.
+            </p>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 max-w-6xl mx-auto px-4">
+            
+    <div @mouseenter="active = 1" @mouseleave="active = null"
+         class="group relative h-[500px] lg:h-[600px] rounded-[3rem] lg:rounded-[4rem] overflow-hidden bg-slate-900 shadow-2xl transition-all duration-700 hover:-translate-y-4 hover:shadow-ocean-500/20">
+        
+        <img src="Assets/iimg1" class="absolute inset-0 w-full h-full object-cover transition-all duration-1000 grayscale group-hover:grayscale-0 group-hover:scale-110 group-hover:rotate-1">
+        
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-90 transition-opacity group-hover:opacity-70"></div>
+
+        <div class="absolute top-8 right-8 w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
+            <span class="text-white font-black text-xl">8+</span>
+            <span class="text-[8px] text-ocean-400 font-bold uppercase">Years</span>
+        </div>
+
+        <div class="absolute bottom-0 p-8 lg:p-12 w-full transition-all duration-500 group-hover:pb-32">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="w-8 h-[2px] bg-ocean-500"></span>
+                <p class="text-ocean-400 text-[10px] font-black uppercase tracking-[0.4em]">Master Instructor</p>
+            </div>
+            <h3 class="text-3xl lg:text-4xl font-black text-white mb-4 tracking-tight">Alex Morgan</h3>
+            <p class="text-slate-400 text-xs font-bold uppercase tracking-widest flex items-center gap-3">
+                <span class="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span> Private Coaching
+            </p>
+        </div>
+
+        <div class="absolute bottom-0 left-0 right-0 p-8 lg:p-10 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-ocean-600/90 backdrop-blur-2xl border-t border-white/20">
+            <p class="text-white text-[10px] font-black uppercase tracking-[0.3em] mb-4 opacity-70">Core Specialties</p>
+            <div class="flex flex-wrap gap-2">
+                <template x-for="skill in ['Deep Sea', 'Rescue Ops', 'Night Nav']">
+                    <span class="px-4 py-2 bg-white/10 rounded-xl text-white text-[10px] font-black border border-white/10" x-text="skill"></span>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <div @mouseenter="active = 2" @mouseleave="active = null"
+         class="group relative h-[500px] lg:h-[600px] rounded-[3rem] lg:rounded-[4rem] overflow-hidden bg-slate-900 shadow-2xl transition-all duration-700 hover:-translate-y-4 hover:shadow-blue-500/20">
+        
+        <img src="Assets/iimg2" class="absolute inset-0 w-full h-full object-cover transition-all duration-1000 grayscale group-hover:grayscale-0 group-hover:scale-110">
+        
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-90"></div>
+
+        <div class="absolute top-8 right-8 w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
+            <span class="text-white font-black text-xl">10+</span>
+            <span class="text-[8px] text-blue-400 font-bold uppercase">Years</span>
+        </div>
+
+        <div class="absolute bottom-0 p-8 lg:p-12 w-full transition-all duration-500 group-hover:pb-32">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="w-8 h-[2px] bg-blue-500"></span>
+                <p class="text-blue-400 text-[10px] font-black uppercase tracking-[0.4em]">IDC Staff Instructor</p>
+            </div>
+            <h3 class="text-3xl lg:text-4xl font-black text-white mb-4 tracking-tight">Sarah Chen</h3>
+            <p class="text-slate-400 text-xs font-bold uppercase tracking-widest flex items-center gap-3">
+                <span class="flex h-2 w-2 rounded-full bg-blue-500"></span> Marine Bio Specialist
+            </p>
+        </div>
+
+        <div class="absolute bottom-0 left-0 right-0 p-8 lg:p-10 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-blue-600/90 backdrop-blur-2xl border-t border-white/20">
+            <p class="text-white text-[10px] font-black uppercase tracking-[0.3em] mb-4 opacity-70">Focus Areas</p>
+            <p class="text-white text-sm font-medium italic leading-relaxed">"Mastering buoyancy while protecting coral ecosystems."</p>
+        </div>
+    </div>
+
+    <div @mouseenter="active = 3" @mouseleave="active = null"
+         class="group relative h-[500px] lg:h-[600px] rounded-[3rem] lg:rounded-[4rem] overflow-hidden bg-slate-900 shadow-2xl transition-all duration-700 hover:-translate-y-4 hover:shadow-red-500/20">
+        
+        <img src="Assets/iimg3" class="absolute inset-0 w-full h-full object-cover transition-all duration-1000 grayscale group-hover:grayscale-0 group-hover:scale-110">
+        
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-90"></div>
+
+        <div class="absolute top-8 right-8 w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
+            <span class="text-white font-black text-xl">12+</span>
+            <span class="text-[8px] text-red-500 font-bold uppercase">Years</span>
+        </div>
+
+        <div class="absolute bottom-0 p-8 lg:p-12 w-full transition-all duration-500 group-hover:pb-32">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="w-8 h-[2px] bg-red-600"></span>
+                <p class="text-red-500 text-[10px] font-black uppercase tracking-[0.4em]">Technical Lead</p>
+            </div>
+            <h3 class="text-3xl lg:text-4xl font-black text-white mb-4 tracking-tight">Marcus Thorne</h3>
+            <p class="text-slate-400 text-xs font-bold uppercase tracking-widest flex items-center gap-3">
+                <span class="flex h-2 w-2 rounded-full bg-red-600"></span> Cave & Tech Examiner
+            </p>
+        </div>
+
+        <div class="absolute bottom-0 left-0 right-0 p-8 lg:p-10 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-red-600/90 backdrop-blur-2xl border-t border-white/20">
+            <p class="text-white text-[10px] font-black uppercase tracking-[0.3em] mb-4 opacity-70">Expertise</p>
+            <p class="text-white text-sm font-medium leading-relaxed">Precision rebreather training and deep wreck penetrations.</p>
+        </div>
+    </div>
+
+    <div @mouseenter="active = 4" @mouseleave="active = null"
+         class="group relative h-[500px] lg:h-[600px] rounded-[3rem] lg:rounded-[4rem] overflow-hidden bg-slate-900 shadow-2xl transition-all duration-700 hover:-translate-y-4 hover:shadow-ocean-500/20">
+        
+        <img src="Assets/iimg1" class="absolute inset-0 w-full h-full object-cover transition-all duration-1000 grayscale group-hover:grayscale-0 group-hover:scale-110">
+        
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-90"></div>
+
+        <div class="absolute bottom-0 p-8 lg:p-12 w-full transition-all duration-500 group-hover:pb-32">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="w-8 h-[2px] bg-green-500"></span>
+                <p class="text-green-400 text-[10px] font-black uppercase tracking-[0.4em]">Eco Expert</p>
+            </div>
+            <h3 class="text-3xl lg:text-4xl font-black text-white mb-4 tracking-tight">Morgan Vale</h3>
+            <p class="text-slate-400 text-xs font-bold uppercase tracking-widest flex items-center gap-3">
+                <span class="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span> Conservation Lead
+            </p>
+        </div>
+
+        <div class="absolute bottom-0 left-0 right-0 p-8 lg:p-10 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-green-600/90 backdrop-blur-2xl border-t border-white/20">
+            <p class="text-white text-[10px] font-black uppercase tracking-[0.3em] mb-4 opacity-70">Focus</p>
+            <p class="text-white text-sm font-medium leading-relaxed">Coral restoration and sustainable diving practices.</p>
+        </div>
+    </div>
+
+</div>
+
+        <!-- <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+            
+            <div @mouseenter="active = 1" @mouseleave="active = null"
+                 class="group relative h-[600px] rounded-[4rem] overflow-hidden bg-slate-900 shadow-2xl transition-all duration-700 hover:-translate-y-4 hover:shadow-ocean-500/20">
+                
+                <img src="Assets/iimg1" 
+                     class="absolute inset-0 w-full h-full object-cover transition-all duration-1000 grayscale group-hover:grayscale-0 group-hover:scale-110 group-hover:rotate-1">
+                
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-90 transition-opacity group-hover:opacity-70"></div>
+
+                <div class="absolute top-8 right-8 w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
+                    <span class="text-white font-black text-xl">8+</span>
+                    <span class="text-[8px] text-ocean-400 font-bold uppercase">Years</span>
+                </div>
+
+                <div class="absolute bottom-0 p-12 w-full transition-all duration-500 group-hover:pb-32">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="w-8 h-[2px] bg-ocean-500"></span>
+                        <p class="text-ocean-400 text-[10px] font-black uppercase tracking-[0.4em]">Master Instructor</p>
+                    </div>
+                    <h3 class="text-4xl font-black text-white mb-4 tracking-tight">Alex Morgan</h3>
+                    <p class="text-slate-400 text-xs font-bold uppercase tracking-widest flex items-center gap-3">
+                        <span class="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span> Available for Private Coaching
+                    </p>
+                </div>
+
+                <div class="absolute bottom-0 left-0 right-0 p-10 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-ocean-600/90 backdrop-blur-2xl border-t border-white/20">
+                    <p class="text-white text-[10px] font-black uppercase tracking-[0.3em] mb-4 opacity-70">Core Specialties</p>
+                    <div class="flex flex-wrap gap-2">
+                        <template x-for="skill in ['Deep Sea', 'Rescue Ops', 'Night Nav']">
+                            <span class="px-4 py-2 bg-white/10 rounded-xl text-white text-[10px] font-black border border-white/10 transition-colors hover:bg-white/20" x-text="skill"></span>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <div @mouseenter="active = 2" @mouseleave="active = null"
+                 class="group relative h-[600px] rounded-[4rem] overflow-hidden bg-slate-900 shadow-2xl transition-all duration-700 hover:-translate-y-4 hover:shadow-blue-500/20">
+                
+                <img src="Assets/iimg2" 
+                     class="absolute inset-0 w-full h-full object-cover transition-all duration-1000 grayscale group-hover:grayscale-0 group-hover:scale-110">
+                
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-90"></div>
+
+                <div class="absolute top-8 right-8 w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
+                    <span class="text-white font-black text-xl">10+</span>
+                    <span class="text-[8px] text-blue-400 font-bold uppercase">Years</span>
+                </div>
+
+                <div class="absolute bottom-0 p-12 w-full transition-all duration-500 group-hover:pb-32">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="w-8 h-[2px] bg-blue-500"></span>
+                        <p class="text-blue-400 text-[10px] font-black uppercase tracking-[0.4em]">IDC Staff Instructor</p>
+                    </div>
+                    <h3 class="text-4xl font-black text-white mb-4 tracking-tight">Sarah Chen</h3>
+                    <p class="text-slate-400 text-xs font-bold uppercase tracking-widest flex items-center gap-3">
+                        <span class="flex h-2 w-2 rounded-full bg-blue-500"></span> Marine Bio Specialist
+                    </p>
+                </div>
+
+                <div class="absolute bottom-0 left-0 right-0 p-10 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-blue-600/90 backdrop-blur-2xl border-t border-white/20">
+                    <p class="text-white text-[10px] font-black uppercase tracking-[0.3em] mb-4 opacity-70">Focus Areas</p>
+                    <p class="text-white text-sm font-medium italic leading-relaxed">"Mastering buoyancy while protecting our delicate coral ecosystems."</p>
+                </div>
+            </div>
+
+            <div @mouseenter="active = 3" @mouseleave="active = null"
+                 class="group relative h-[600px] rounded-[4rem] overflow-hidden bg-slate-900 shadow-2xl transition-all duration-700 hover:-translate-y-4 hover:shadow-red-500/20">
+                
+                <img src="Assets/iimg3" 
+                     class="absolute inset-0 w-full h-full object-cover transition-all duration-1000 grayscale group-hover:grayscale-0 group-hover:scale-110">
+                
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-90"></div>
+
+                <div class="absolute top-8 right-8 w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
+                    <span class="text-white font-black text-xl">12+</span>
+                    <span class="text-[8px] text-red-500 font-bold uppercase">Years</span>
+                </div>
+
+                <div class="absolute bottom-0 p-12 w-full transition-all duration-500 group-hover:pb-32">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="w-8 h-[2px] bg-red-600"></span>
+                        <p class="text-red-500 text-[10px] font-black uppercase tracking-[0.4em]">Technical Lead</p>
+                    </div>
+                    <h3 class="text-4xl font-black text-white mb-4 tracking-tight">Marcus Thorne</h3>
+                    <p class="text-slate-400 text-xs font-bold uppercase tracking-widest flex items-center gap-3">
+                        <span class="flex h-2 w-2 rounded-full bg-red-600"></span> Cave & Tech Examiner
+                    </p>
+                </div>
+
+                <div class="absolute bottom-0 left-0 right-0 p-10 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-slate-800/90 backdrop-blur-2xl border-t border-white/20">
+                    <p class="text-white text-[10px] font-black uppercase tracking-[0.3em] mb-4 opacity-70">Expertise</p>
+                    <p class="text-white text-sm font-medium leading-relaxed">Precision rebreather training and deep wreck penetrations.</p>
+                </div>
+            </div>
+             <div @mouseenter="active = 1" @mouseleave="active = null"
+                 class="group relative h-[600px] rounded-[4rem] overflow-hidden bg-slate-900 shadow-2xl transition-all duration-700 hover:-translate-y-4 hover:shadow-ocean-500/20">
+                
+                <img src="Assets/iimg1" 
+                     class="absolute inset-0 w-full h-full object-cover transition-all duration-1000 grayscale group-hover:grayscale-0 group-hover:scale-110 group-hover:rotate-1">
+                
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-90 transition-opacity group-hover:opacity-70"></div>
+
+                <div class="absolute top-8 right-8 w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
+                    <span class="text-white font-black text-xl">8+</span>
+                    <span class="text-[8px] text-ocean-400 font-bold uppercase">Years</span>
+                </div>
+
+                <div class="absolute bottom-0 p-12 w-full transition-all duration-500 group-hover:pb-32">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="w-8 h-[2px] bg-ocean-500"></span>
+                        <p class="text-ocean-400 text-[10px] font-black uppercase tracking-[0.4em]">Master Instructor</p>
+                    </div>
+                    <h3 class="text-4xl font-black text-white mb-4 tracking-tight">Alex Morgan</h3>
+                    <p class="text-slate-400 text-xs font-bold uppercase tracking-widest flex items-center gap-3">
+                        <span class="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span> Available for Private Coaching
+                    </p>
+                </div>
+
+                <div class="absolute bottom-0 left-0 right-0 p-10 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-ocean-600/90 backdrop-blur-2xl border-t border-white/20">
+                    <p class="text-white text-[10px] font-black uppercase tracking-[0.3em] mb-4 opacity-70">Core Specialties</p>
+                    <div class="flex flex-wrap gap-2">
+                        <template x-for="skill in ['Deep Sea', 'Rescue Ops', 'Night Nav']">
+                            <span class="px-4 py-2 bg-white/10 rounded-xl text-white text-[10px] font-black border border-white/10 transition-colors hover:bg-white/20" x-text="skill"></span>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+        </div> -->
+    </div>
+</section>
+
+<section id="standards" 
+         class="py-16 md:py-24 bg-slate-50 dark:bg-slate-950 transition-colors duration-500 overflow-hidden relative"
+         x-data="{ active: null }">
+    
+    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-ocean-500 to-transparent opacity-30"></div>
+
+    <div class="max-w-7xl mx-auto px-6">
+        
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-5xl font-black tracking-tighter uppercase mb-4 dark:text-white">
+                The <span class="text-ocean-500">DeepBlue</span> Standards
+            </h2>
+            <div class="w-24 h-1.5 bg-ocean-500 mx-auto rounded-full mb-6"></div>
+            <p class="text-slate-500 dark:text-slate-400 font-medium max-w-xl mx-auto text-sm md:text-base italic">
+                Safety and excellence are our primary descent protocols.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+            
+            <template x-for="(standard, index) in [
+                {id: 1, icon: '🛡️', title: 'Safety First', desc: 'Global safety protocols for confident and enjoyable dives.', tags: ['PADI/SSI Specs', 'Gear Check 24/7']},
+                {id: 2, icon: '🎯', title: 'Elite Focus', desc: 'Small groups ensure individual attention and faster skill mastery.', tags: ['4:1 Ratio Max', 'Skill Focus']},
+                {id: 3, icon: '📘', title: 'Practical IQ', desc: 'Mastering theory through hands-on pool drills and simulations.', tags: ['Drill Mastery', 'Real Scenarios']},
+                {id: 4, icon: '🌱', title: 'Eco-Mission', desc: 'Protecting the abyss through reef-safe habits and awareness.', tags: ['Reef Safe', 'Green Fins']}
+            ]" :key="index">
+                
+                <div @mouseenter="active = standard.id" @mouseleave="active = null"
+                     class="relative p-8 md:p-10 rounded-[3rem] transition-all duration-500 group cursor-default h-full flex flex-col border border-transparent bg-white dark:bg-slate-900 shadow-sm overflow-hidden"
+                     :class="active === standard.id ? 'shadow-2xl shadow-ocean-500/10 -translate-y-4 border-ocean-500/20' : ''">
+                    
+                    <div class="mb-8 flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center text-3xl transition-all duration-500 group-hover:bg-ocean-500 group-hover:text-white group-hover:rotate-12" 
+                             x-text="standard.icon">
+                        </div>
+                        <div class="h-px flex-grow bg-slate-200 dark:bg-slate-800 group-hover:bg-ocean-500 transition-colors duration-500"></div>
+                    </div>
+
+                    <h4 class="text-lg font-black uppercase tracking-tighter text-slate-900 dark:text-white mb-4 group-hover:text-ocean-500 transition-colors" x-text="standard.title"></h4>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed mb-8 flex-grow" x-text="standard.desc"></p>
+                    
+                    <div class="overflow-hidden transition-all duration-500 max-h-0 group-hover:max-h-24">
+                        <div class="pt-6 border-t dark:border-slate-800 space-y-2">
+                            <template x-for="tag in standard.tags">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-ocean-500 animate-pulse"></span>
+                                    <span class="text-[10px] font-black uppercase text-ocean-500 tracking-widest" x-text="tag"></span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="absolute bottom-0 left-0 w-full h-1 bg-ocean-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-700 origin-left"></div>
+                </div>
+
+            </template>
+        </div>
+    </div>
+</section>
+
+<section class="py-24 bg-white dark:bg-slate-950 transition-colors duration-500">
+    <div class="max-w-5xl mx-auto px-6">
+        <div class="relative group bg-ocean-500 rounded-[3rem] p-12 md:p-20 text-center overflow-hidden shadow-2xl shadow-ocean-500/30">
+            
+            <div class="absolute -top-24 -left-24 w-64 h-64 bg-white/10 rounded-full animate-pulse"></div>
+            
+            <div class="relative z-10">
+                <h2 class="text-4xl md:text-6xl font-black text-white mb-8 tracking-tighter leading-tight">
+                    Trusted Guidance for <br/> Your Next Adventure.
+                </h2>
+                <p class="text-ocean-50 text-xl font-medium mb-12 max-w-2xl mx-auto opacity-90">
+                    Join our internationally certified masters and start your diving journey with professional training and expert support.
+                </p>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="courses.html" class="w-full sm:w-auto px-12 py-5 bg-white text-ocean-600 rounded-2xl font-black uppercase text-xs tracking-widest hover:scale-105 transition-all shadow-xl">Explore Courses</a>
+                    <a href="contact.html" class="w-full sm:w-auto px-12 py-5 bg-ocean-900/20 text-white border border-white/30 backdrop-blur-md rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-white/10 transition-all">Talk to Alex</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+   <footer class="bg-slate-50 dark:bg-slate-950 pt-20 pb-10 border-t dark:border-slate-800 transition-colors duration-500">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8">
+            
+            <div class="lg:col-span-2">
+                <a href="index.html">
+ <div class="flex items-center gap-2 mb-6">
+                    <div class="w-10 h-10 bg-ocean-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-ocean-500/20">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+                    </div>
+                    <span class="text-xl lg:text-2xl font-black tracking-tighter bg-gradient-to-r from-blue-600 to-ocean-400 bg-clip-text text-transparent uppercase italic">DeepBlue</span>
+                </div>
+                </a>
+               
+                <p class="text-slate-500 dark:text-slate-400 max-w-sm mb-8 leading-relaxed">
+                    Providing world-class scuba diving training and global certifications since 2015. Our mission is to explore the blue safely and sustainably.
+                </p>
+                <div class="flex flex-wrap gap-4">
+    <a href="#" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-ocean-500 hover:text-white hover:border-ocean-500 hover:-translate-y-1 transition-all shadow-sm">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
+    </a>
+
+    <a href="#" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-ocean-500 hover:text-white hover:border-ocean-500 hover:-translate-y-1 transition-all shadow-sm">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+    </a>
+
+    <a href="#" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-ocean-500 hover:text-white hover:border-ocean-500 hover:-translate-y-1 transition-all shadow-sm">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M22.675 0h-21.35C.597 0 0 .597 0 1.326v21.348C0 23.403.597 24 1.325 24H12.82v-9.294H9.692v-3.622h3.128V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12V24h6.116c.73 0 1.325-.597 1.325-1.326V1.326C24 .597 23.403 0 22.675 0z"/></svg>
+    </a>
+
+    
+
+    <a href="#" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-ocean-500 hover:text-white hover:border-ocean-500 hover:-translate-y-1 transition-all shadow-sm">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+    </a>
+
+    
+</div>
+            </div>
+
+            <div>
+                <h4 class="font-black text-xs uppercase tracking-[0.2em] text-slate-900 dark:text-white mb-6">Navigation</h4>
+                <ul class="space-y-4">
+                    <li><a href="index.html" class="text-slate-500 dark:text-slate-400 hover:text-ocean-500 transition-colors font-medium">Home</a></li>
+                    <li><a href="home2.html" class="text-slate-500 dark:text-slate-400 hover:text-ocean-500 transition-colors font-medium">Home2</a></li>
+                    <li><a href="course.html" class="text-slate-500 dark:text-slate-400 hover:text-ocean-500 transition-colors font-medium">Our Courses</a></li>
+                    <li><a href="Instructors.html" class="text-slate-500 dark:text-slate-400 hover:text-ocean-500 transition-colors font-medium">Meet Instructors</a></li>
+                    <li><a href="about.html" class="text-slate-500 dark:text-slate-400 hover:text-ocean-500 transition-colors font-medium">Equipment Resources</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-black text-xs uppercase tracking-[0.2em] text-slate-900 dark:text-white mb-6">Quick Links</h4>
+                <ul class="space-y-4">
+                    <li><a href="about.html" class="text-slate-500 dark:text-slate-400 hover:text-ocean-500 transition-colors font-medium">About Us</a></li>
+                    <li><a href="contact.html" class="text-slate-500 dark:text-slate-400 hover:text-ocean-500 transition-colors font-medium">Contact Center</a></li>
+                    <li><a href="comingsoon.html" class="text-slate-500 dark:text-slate-400 hover:text-ocean-500 transition-colors font-medium">Coming Soon</a></li>
+                    <li><a href="#" class="text-slate-500 dark:text-slate-400 hover:text-ocean-500 transition-colors font-medium flex items-center gap-2">
+                        System Status <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                    </a></li>
+                    <li><a href="404.html" class="text-slate-500 dark:text-slate-400 hover:text-ocean-500 transition-colors font-medium">404 Error Page</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-black text-xs uppercase tracking-[0.2em] text-slate-900 dark:text-white mb-6">Weekly Briefing</h4>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mb-4 font-medium">Get dive tips and trip alerts.</p>
+                <div class="relative group">
+                    <input type="email" placeholder="Your email address" 
+                           class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-xl outline-none focus:border-ocean-500 transition-all text-sm font-medium">
+                    <button class="absolute right-2 top-2 bottom-2 bg-ocean-500 text-white px-4 rounded-lg hover:bg-ocean-600 transition-colors font-bold">
+                        Join
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-20 pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6">
+            <p class="text-xs font-bold uppercase tracking-widest text-slate-400">
+                © 2026 DeepBlue Diving Center. All rights reserved.
+            </p>
+            <div class="flex gap-8">
+                <a href="#" class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-ocean-500 transition-colors">Privacy Policy</a>
+                <a href="#" class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-ocean-500 transition-colors">Terms of Service</a>
+                <a href="#" class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-ocean-500 transition-colors">Cookie Settings</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" x-data="{ 
+    darkMode: localStorage.getItem('theme') === 'dark', 
+    isRtl: false, isLogin: true,
+    toggleTheme() { this.darkMode = !this.darkMode; localStorage.setItem('theme', this.darkMode ? 'dark' : 'light'); },
+    toggleDir() { this.isRtl = !this.isRtl; document.documentElement.dir = this.isRtl ? 'rtl' : 'ltr'; }
+}" :class="{'dark': darkMode}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="Assets/scuba.png">
+    <title>Deep Dive | Auth</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { ocean: { 500: '#0ea5e9' } } } } }
+    </script>
+</head>
+<body class="transition-colors duration-500 min-h-screen flex items-center justify-center p-4" :class="darkMode ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'">
+
+    <div class="fixed top-4 right-4 flex gap-2" :class="isRtl ? 'right-auto left-4' : 'right-4'">
+        <button @click="toggleDir()" class="p-2 border rounded-lg text-[10px] font-black uppercase tracking-widest opacity-60 hover:opacity-100 transition-all active:scale-90" :class="darkMode ? 'border-white/10' : 'border-black/10'" x-text="isRtl ? 'LTR' : 'RTL'"></button>
+        <button @click="toggleTheme()" class="p-2 border rounded-lg opacity-60 hover:opacity-100 transition-all active:scale-90" :class="darkMode ? 'border-white/10' : 'border-black/10'"><span x-text="darkMode ? '☀️' : '🌙'"></span></button>
+    </div>
+
+    <div class="w-full max-w-md p-10 rounded-[2.5rem] shadow-2xl transition-all" :class="darkMode ? 'bg-slate-900 border border-white/5 shadow-ocean-500/5' : 'bg-white shadow-slate-200'">
+        <!-- <div class="text-center mb-10">
+            <a href="/index.html" class="flex items-center gap-3 group transition-transform active:scale-95 shrink-0">
+    
+    <div class="w-10 h-10 bg-ocean-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-ocean-500/20 group-hover:rotate-12 transition-transform duration-300">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+        </svg>
+    </div>
+
+    <span class="text-xl lg:text-2xl font-black tracking-tighter bg-gradient-to-r from-blue-600 to-ocean-400 bg-clip-text text-transparent uppercase italic leading-none">
+        DeepBlue
+    </span>
+
+</a>
+            <!-- <a href="index.html">
+                <h1 class="text-4xl font-black tracking-tighter uppercase italic text-ocean-500 mb-2">Deep Blue</h1>
+            </a> -->
+            
+            <!-- <h2 class="text-xl font-bold opacity-80" x-text="isLogin ? 'Welcome Back' : 'Create Account'"></h2>
+            <p class="text-xs font-medium opacity-50 mt-2">
+                <span x-text="isLogin ? 'New to the ocean?' : 'Already a diver?'"></span>
+                <button @click="isLogin = !isLogin" class="text-ocean-500 font-black ml-1 uppercase text-[10px] tracking-widest hover:underline" x-text="isLogin ? 'Join Now' : 'Login'"></button>
+            </p>
+        </div>  -->
+        <div class="text-center mb-10 flex flex-col items-center">
+    
+    <a href="index.html" class="flex items-center justify-center gap-3 group transition-transform active:scale-95 shrink-0 mb-6">
+        <div class="w-10 h-10 bg-ocean-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-ocean-500/20 group-hover:rotate-12 transition-transform duration-300">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+            </svg>
+        </div>
+
+       <span class="text-2xl lg:text-3xl font-black tracking-tighter text-blue-500/80 dark:text-blue-400/70 uppercase italic leading-none">
+    DeepBlue
+</span>
+    </a>
+
+    <div class="space-y-2">
+        <h2 class="text-xl lg:text-2xl font-bold text-slate-800 dark:text-white opacity-90" 
+            x-text="isLogin ? 'Welcome Back' : 'Create Account'">
+        </h2>
+        <p class="text-xs font-medium text-slate-500 dark:text-slate-400">
+            <span x-text="isLogin ? 'New to the ocean?' : 'Already a diver?'"></span>
+            <button @click="isLogin = !isLogin" 
+                    class="text-ocean-500 font-black ml-1 uppercase text-[10px] tracking-widest hover:text-blue-600 transition-colors" 
+                    x-text="isLogin ? 'Join Now' : 'Login'">
+            </button>
+        </p>
+    </div>
+
+</div>
+
+        <form class="space-y-4" @submit.prevent="window.location.href='index.html'">
+            <template x-if="!isLogin">
+                <input type="text" placeholder="Full Name" required class="w-full p-4 rounded-2xl bg-slate-100 dark:bg-white/5 outline-none border-2 border-transparent focus:border-ocean-500 transition-all font-bold text-sm">
+            </template>
+            
+            <input type="email" placeholder="Email Address" required class="w-full p-4 rounded-2xl bg-slate-100 dark:bg-white/5 outline-none border-2 border-transparent focus:border-ocean-500 transition-all font-bold text-sm">
+            
+            <div class="space-y-2">
+                <input type="password" placeholder="Password" required class="w-full p-4 rounded-2xl bg-slate-100 dark:bg-white/5 outline-none border-2 border-transparent focus:border-ocean-500 transition-all font-bold text-sm">
+                
+                <div x-show="isLogin" class="text-right px-2">
+                    <a href="#" class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-ocean-500 transition-colors">Forgot Access?</a>
+                </div>
+            </div>
+            
+            <button class="w-full py-5 bg-ocean-500 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-xs hover:brightness-110 shadow-lg shadow-ocean-500/20 active:scale-95 transition-all" :class="isLogin ? 'mt-6' : 'mt-2'">
+                <span x-text="isLogin ? 'Login' : 'Begin Journey'"></span>
+            </button>
+        </form>
+
+        <div class="mt-10">
+            <div class="relative flex items-center mb-8">
+                <div class="flex-grow border-t border-slate-200 dark:border-white/5"></div>
+                <span class="flex-shrink mx-4 text-[9px] font-black uppercase tracking-[0.3em] opacity-30">Quick Link</span>
+                <div class="flex-grow border-t border-slate-200 dark:border-white/5"></div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <button class="flex items-center justify-center gap-3 py-4 rounded-2xl border-2 border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/5 transition-all group active:scale-95">
+                    <svg class="w-5 h-5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.9 3.16-1.84 4.04-1.16 1.16-2.96 2.4-5.84 2.4-4.52 0-8.12-3.64-8.12-8.16s3.6-8.16 8.12-8.16c2.44 0 4.28.96 5.6 2.24l2.32-2.32C18.6 2.36 15.8 1.12 12.48 1.12 6.48 1.12 1.6 6 1.6 12s4.88 10.88 10.88 10.88c3.24 0 5.68-1.08 7.6-3.08 2.04-2.04 2.68-4.92 2.68-7.28 0-.6-.04-1.2-.12-1.6h-10.16z"/></svg>
+                    <span class="text-[10px] font-black uppercase tracking-widest">Google</span>
+                </button>
+                <button class="flex items-center justify-center gap-3 py-4 rounded-2xl border-2 border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/5 transition-all group active:scale-95">
+                    <svg class="w-5 h-5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                    <span class="text-[10px] font-black uppercase tracking-widest">Github</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <p class="fixed bottom-6 text-[10px] font-black uppercase tracking-[0.4em] opacity-20">Secure Diving Terminal © 2026</p>
+</body>
+</html>

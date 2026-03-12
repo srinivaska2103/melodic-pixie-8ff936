@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="en" 
+      x-data="{ 
+        darkMode: localStorage.getItem('theme') === 'dark', 
+        isRtl: localStorage.getItem('dir') === 'rtl', 
+        mobileMenu: false, 
+        profileDropdown: false,
+        toggleTheme() {
+            this.darkMode = !this.darkMode;
+            localStorage.setItem('theme', this.darkMode ? 'dark' : 'light');
+        },
+        toggleDir() {
+            this.isRtl = !this.isRtl;
+            localStorage.setItem('dir', this.isRtl ? 'rtl' : 'ltr');
+        }
+      }" 
+      :class="{'dark': darkMode}" 
+      :dir="isRtl ? 'rtl' : 'ltr'">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="icon" href="Assets/scuba.png">
+   
+    <title>DeepBlue | Scuba Diving & Certifications</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: { ocean: { 50: '#f0f9ff', 400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7', 900: '#0c4a6e' } }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none !important; }
+        body { font-family: 'Inter', sans-serif; transition: background-color 0.3s ease; }
+        .glass { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    </style>
+</head>
+<body class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition-all">
+
+<nav class="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 glass border-b dark:border-slate-800" 
+     x-data="{ 
+        activeTab: sessionStorage.getItem('activeNav') || 'Home',
+        profileDropdown: false,
+        mobileDashOpen: false,
+        setActive(name) {
+            this.activeTab = name;
+            sessionStorage.setItem('activeNav', name);
+        }
+     }">
+    <!-- <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-20 items-center">
+            
+            <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer group">
+                <div class="w-10 h-10 bg-ocean-500 rounded-lg flex items-center justify-center text-white shadow-lg group-hover:rotate-12 transition-transform">
+                    <a href="index.html" @click="setActive('Home')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                        </svg>
+                    </a>
+                </div>
+                <span class="text-2xl font-black tracking-tighter bg-gradient-to-r from-blue-600 to-ocean-400 bg-clip-text text-transparent uppercase italic">
+                    DeepBlue
+                </span>
+            </div>
+
+            <div class="hidden lg:flex items-center space-x-1 rtl:space-x-reverse">
+                <template x-for="link in [
+                    { name: 'Home', url: 'index.html' }, 
+                    { name: 'Home2', url: 'home2.html' }, 
+                    { name: 'Courses', url: 'course.html' }, 
+                    { name: 'Instructors', url: 'instructors.html' }, 
+                    { name: 'Resources', url: 'about.html' },
+                    { name: 'Contact us', url: 'contact.html' }
+                ]">
+                    <a :href="link.url" 
+                       @click="setActive(link.name)"
+                       :class="activeTab === link.name ? 'text-ocean-500 bg-ocean-50 dark:bg-ocean-900/20' : 'text-slate-600 dark:text-slate-300 hover:text-ocean-500 hover:bg-ocean-50 dark:hover:bg-slate-800'"
+                       class="px-4 py-2 rounded-xl font-bold text-sm transition-all duration-200" 
+                       x-text="link.name"></a>
+                </template>
+
+                <div class="relative" @click.away="profileDropdown = false">
+                    <button @click="profileDropdown = !profileDropdown"
+                            :class="activeTab === 'Dashboard' ? 'text-ocean-500 bg-ocean-50 dark:bg-ocean-900/20' : 'text-slate-600 dark:text-slate-300'"
+                            class="flex items-center gap-1 px-4 py-2 rounded-xl font-bold text-sm hover:text-ocean-500 transition-all">
+                        Dashboard
+                        <svg class="w-4 h-4 transition-transform" :class="profileDropdown ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="profileDropdown" x-cloak x-transition class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border dark:border-slate-700 py-2 z-50">
+                        <a href="user.html" @click="setActive('Dashboard')" class="flex items-center gap-2 px-4 py-2 hover:bg-ocean-50 dark:hover:bg-slate-700 text-sm font-bold">
+                            👤 User Panel
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-1.5 sm:gap-4">
+                
+                <button @click="toggleDir()" 
+                        class="flex items-center justify-center min-w-[42px] text-[9px] font-black border-2 border-slate-200 dark:border-slate-700 px-2 py-1.5 rounded-lg uppercase hover:bg-ocean-500 hover:text-white transition-all active:scale-90">
+                    <span x-text="isRtl ? 'LTR' : 'RTL'"></span>
+                </button>
+
+                <button @click="toggleTheme()" 
+                        class="p-2.5 rounded-xl border-2 border-transparent bg-slate-100 dark:bg-slate-800 hover:bg-ocean-500 hover:text-white transition-all active:scale-90">
+                    <span x-show="!darkMode" x-cloak>🌙</span>
+                    <span x-show="darkMode" x-cloak>☀️</span>
+                </button>
+
+                <a href="login.html" class="hidden sm:block bg-ocean-500 text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:shadow-lg transition-all">Login</a>
+                
+                <button @click="mobileMenu = !mobileMenu" class="lg:hidden p-2 text-slate-600 dark:text-slate-300">
+                    <svg x-show="!mobileMenu" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    <svg x-show="mobileMenu" x-cloak class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>
+    </div> -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between h-20 items-center gap-2">
+        
+        <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer group">
+            <div class="w-9 h-9 lg:w-10 lg:h-10 bg-ocean-500 rounded-lg flex items-center justify-center text-white shadow-lg group-hover:rotate-12 transition-transform">
+                <a href="index.html" @click="setActive('Home')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                    </svg>
+                </a>
+            </div>
+            <span class="text-xl lg:text-2xl font-black tracking-tighter bg-gradient-to-r from-blue-600 to-ocean-400 bg-clip-text text-transparent uppercase italic">
+                DeepBlue
+            </span>
+        </div>
+
+        <div class="hidden lg:flex items-center space-x-0.5 xl:space-x-1 rtl:space-x-reverse">
+            <template x-for="link in [
+                { name: 'Home', url: 'index.html' }, 
+                { name: 'Home2', url: 'home2.html' }, 
+                { name: 'Courses', url: 'course.html' }, 
+                { name: 'Instructors', url: 'instructors.html' }, 
+                { name: 'Resources', url: 'about.html' },
+                { name: 'Contact', url: 'contact.html' }
+            ]">
+                <a :href="link.url" 
+                   @click="setActive(link.name)"
+                   :class="activeTab === link.name ? 'text-ocean-500 bg-ocean-50 dark:bg-ocean-900/20' : 'text-slate-600 dark:text-slate-300 hover:text-ocean-500 hover:bg-ocean-50 dark:hover:bg-slate-800'"
+                   class="px-2.5 xl:px-4 py-2 rounded-xl font-bold text-[13px] xl:text-sm transition-all duration-200 whitespace-nowrap" 
+                   x-text="link.name"></a>
+            </template>
+
+            <div class="relative" @click.away="profileDropdown = false">
+                <button @click="profileDropdown = !profileDropdown"
+                        :class="activeTab === 'Dashboard' ? 'text-ocean-500 bg-ocean-50 dark:bg-ocean-900/20' : 'text-slate-600 dark:text-slate-300'"
+                        class="flex items-center gap-1 px-2.5 xl:px-4 py-2 rounded-xl font-bold text-[13px] xl:text-sm hover:text-ocean-500 transition-all">
+                    Dashboard
+                    <svg class="w-4 h-4 transition-transform" :class="profileDropdown ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div x-show="profileDropdown" x-cloak x-transition class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border dark:border-slate-700 py-2 z-50">
+                    <a href="user.html" @click="setActive('Dashboard')" class="flex items-center gap-2 px-4 py-2 hover:bg-ocean-50 dark:hover:bg-slate-700 text-sm font-bold">
+                        👤 User Panel
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 xl:gap-4 shrink-0">
+            <button @click="toggleDir()" 
+                    class="flex items-center justify-center min-w-[38px] xl:min-w-[42px] text-[8px] xl:text-[9px] font-black border-2 border-slate-200 dark:border-slate-700 px-2 py-1.5 rounded-lg uppercase hover:bg-ocean-500 hover:text-white transition-all active:scale-90">
+                <span x-text="isRtl ? 'LTR' : 'RTL'"></span>
+            </button>
+
+            <button @click="toggleTheme()" 
+                    class="p-2 xl:p-2.5 rounded-xl border-2 border-transparent bg-slate-100 dark:bg-slate-800 hover:bg-ocean-500 hover:text-white transition-all active:scale-90">
+                <span x-show="!darkMode" class="text-sm xl:text-base">🌙</span>
+                <span x-show="darkMode" class="text-sm xl:text-base">☀️</span>
+            </button>
+
+            <a href="login.html" class="hidden sm:block bg-ocean-500 text-white px-4 xl:px-6 py-2.5 rounded-xl font-bold text-[13px] xl:text-sm hover:shadow-lg transition-all whitespace-nowrap">Login</a>
+            
+            <button @click="mobileMenu = !mobileMenu" class="lg:hidden p-2 text-slate-600 dark:text-slate-300">
+                <svg x-show="!mobileMenu" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                <svg x-show="mobileMenu" x-cloak class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+    </div>
+</div>
+    <div x-show="mobileMenu" 
+         x-cloak
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 -translate-y-10"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         class="lg:hidden fixed inset-x-0 top-20 bg-white dark:bg-slate-900 border-b dark:border-slate-800 shadow-2xl z-[200] glass">
+        
+        <div class="px-6 pt-4 pb-10 space-y-2 max-h-[80vh] overflow-y-auto">
+            <template x-for="link in [
+                {n: 'Home', u: 'index.html'}, 
+                {n: 'Home2', u: 'home2.html'}, 
+                {n: 'Courses', u: 'course.html'}, 
+                {n: 'Instructors', u: 'instructors.html'}, 
+                {n: 'Resources', u: 'about.html'},
+                {n: 'Contact us', u: 'contact.html'}
+            ]">
+                <a :href="link.u" 
+                   @click="setActive(link.n)"
+                   :class="activeTab === link.n ? 'text-ocean-500 bg-ocean-50 dark:bg-ocean-900/20 font-black' : 'text-slate-600 dark:text-slate-300 font-bold'"
+                   class="block px-4 py-4 rounded-2xl hover:bg-ocean-50 transition-all uppercase text-xs tracking-widest">
+                    <span x-text="link.n"></span>
+                </a>
+            </template>
+
+            <div class="rounded-2xl border dark:border-slate-800">
+                <button @click="mobileDashOpen = !mobileDashOpen" 
+                        :class="activeTab === 'Dashboard' ? 'text-ocean-500' : ''"
+                        class="w-full flex justify-between items-center px-4 py-4 font-black uppercase text-xs tracking-widest">
+                    Dashboard Suite
+                    <svg class="w-4 h-4 transition-transform" :class="mobileDashOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div x-show="mobileDashOpen" x-transition class="px-4 pb-4 space-y-2">
+                    <a href="user.html" @click="setActive('Dashboard')" class="block p-4 rounded-xl bg-slate-50 dark:bg-white/5 text-[10px] font-black uppercase tracking-widest">📊 Diver Panel</a>
+                </div>
+            </div>
+
+            <div class="pt-6 mt-4 border-t dark:border-slate-800 text-center">
+                <a href="login.html" class="block w-full bg-ocean-500 text-white py-5 rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg">Enter Terminal</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+    <!-- <header class="relative h-[80vh] flex items-center overflow-hidden">
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&q=80&w=2000" class="w-full h-full object-cover brightness-50" alt="Scuba Diving">
+        </div>
+        <div class="relative z-10 max-w-7xl mx-auto px-4 text-white">
+            <h1 class="text-5xl md:text-7xl font-bold mb-6">Explore the ocean, learn scuba diving, and earn <span class="text-ocean-500">globally recognised</span> certifications.</h1>
+            <p class="text-xl md:text-2xl mb-8 max-w-2xl opacity-90">Start your underwater adventure with expert instructors and safe, unforgettable dive experiences.</p>
+            <div class="flex flex-wrap gap-4">
+                <button class="bg-ocean-500 hover:bg-ocean-600 px-8 py-4 rounded-xl font-bold text-lg transition-all">Book a Dive Course</button>
+                <button class="bg-white/10 backdrop-blur-md hover:bg-white/20 px-8 py-4 rounded-xl font-bold text-lg transition-all border border-white/30">Explore Trips</button>
+            </div>
+        </div>
+    </header> -->
+<header class="relative min-h-[90vh] lg:h-[85vh] flex items-center overflow-hidden bg-slate-900">
+    <div class="absolute inset-0 z-0">
+        <img src="Assets/indexhero" 
+             class="w-full h-full object-cover brightness-[0.4] lg:brightness-50" 
+             alt="Scuba Diving">
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-slate-900/20 to-slate-900/80 lg:hidden"></div>
+    </div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-6 py-20 lg:py-0 w-full">
+        <div class="max-w-4xl">
+            <span class="inline-block px-4 py-2 rounded-full bg-ocean-500/20 border border-ocean-500/30 text-ocean-400 text-sm font-bold mb-6 tracking-wide uppercase">
+                Global Scuba Excellence
+            </span>
+            
+            <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-[1.1] mb-6">
+                Explore the ocean, learn scuba diving, and earn 
+                <span class="text-ocean-400">globally recognised</span> certifications.
+            </h1>
+
+            <p class="text-lg sm:text-xl md:text-2xl text-slate-200 mb-10 max-w-2xl leading-relaxed opacity-90">
+                Start your underwater adventure with expert instructors and safe, unforgettable dive experiences.
+            </p>
+
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                <a href="booking.html">
+<button class="bg-ocean-500 hover:bg-ocean-600 text-white px-8 py-4 rounded-2xl font-bold text-lg transition-all shadow-lg shadow-ocean-500/25 text-center">
+                    Book a Dive Course
+                </button>
+                </a>
+                <a href="comingsoon.html">
+  <button class="bg-white/10 backdrop-blur-md hover:bg-white/20 text-white px-8 py-4 rounded-2xl font-bold text-lg transition-all border border-white/30 text-center">
+                    Explore Guided Trips
+                </button>
+                </a>
+              
+            </div>
+
+            <!-- <div class="mt-12 flex flex-wrap gap-8 border-t border-white/10 pt-8">
+                <div>
+                    <p class="text-2xl font-bold text-white">50+</p>
+                    <p class="text-sm text-slate-400">Dive Locations</p>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-white">10k+</p>
+                    <p class="text-sm text-slate-400">Certified Divers</p>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-white">100%</p>
+                    <p class="text-sm text-slate-400">Safety Record</p>
+                </div>
+            </div> -->
+        </div>
+    </div>
+</header>
+
+    <section class="py-24 relative overflow-hidden bg-white dark:bg-slate-900 transition-colors duration-500" 
+         x-data="{ shown: false }" 
+         x-intersect="shown = true">
+    
+    <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none opacity-20 dark:opacity-10">
+        <div class="absolute -top-24 -left-24 w-96 h-96 bg-ocean-400 rounded-full blur-3xl animate-pulse"></div>
+        <div class="absolute top-1/2 -right-24 w-64 h-64 bg-blue-600 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6 relative z-10">
+        <div class="text-center mb-16"
+             x-show="shown" 
+             x-transition:enter="transition ease-out duration-1000"
+             x-transition:enter-start="opacity-0 translate-y-10"
+             x-transition:enter-end="opacity-100 translate-y-0">
+            
+            <h2 class="text-ocean-500 dark:text-ocean-400 font-bold tracking-[0.2em] uppercase text-sm mb-4 inline-flex items-center gap-2">
+                <span class="w-8 h-[2px] bg-ocean-500"></span>
+                Welcome to DeepBlue
+                <span class="w-8 h-[2px] bg-ocean-500"></span>
+            </h2>
+            
+            <p class="text-3xl md:text-5xl font-bold max-w-4xl mx-auto leading-tight text-slate-900 dark:text-white">
+                We provide <span class="text-transparent bg-clip-text bg-gradient-to-r from-ocean-600 to-blue-400">professional training</span>, guided tours, and premium equipment.
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8 mt-12">
+            
+            <div class="group p-8 rounded-3xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800/50 hover:bg-ocean-500 dark:hover:bg-ocean-600 transition-all duration-500 hover:-translate-y-4 shadow-xl hover:shadow-ocean-500/40 cursor-default">
+                <div class="w-16 h-16 bg-ocean-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-white/20 transition-colors">
+                    <span class="text-3xl group-hover:scale-110 transition-transform">🎓</span>
+                </div>
+                <h3 class="text-xl font-bold mb-3 group-hover:text-white">Professional Training</h3>
+                <p class="text-slate-600 dark:text-slate-400 group-hover:text-white/90 leading-relaxed">
+                    Master the depths with our internationally recognized PADI & SSI certification courses.
+                </p>
+            </div>
+
+            <div class="group p-8 rounded-3xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800/50 hover:bg-ocean-500 dark:hover:bg-ocean-600 transition-all duration-500 hover:-translate-y-4 shadow-xl hover:shadow-ocean-500/40 cursor-default">
+                <div class="w-16 h-16 bg-ocean-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-white/20 transition-colors">
+                    <span class="text-3xl group-hover:scale-110 transition-transform">🚤</span>
+                </div>
+                <h3 class="text-xl font-bold mb-3 group-hover:text-white">Guided Tours</h3>
+                <p class="text-slate-600 dark:text-slate-400 group-hover:text-white/90 leading-relaxed">
+                    Discover hidden shipwrecks and vibrant coral reefs with our local expert guides.
+                </p>
+            </div>
+
+            <div class="group p-8 rounded-3xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800/50 hover:bg-ocean-500 dark:hover:bg-ocean-600 transition-all duration-500 hover:-translate-y-4 shadow-xl hover:shadow-ocean-500/40 cursor-default">
+                <div class="w-16 h-16 bg-ocean-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-white/20 transition-colors">
+                    <span class="text-3xl group-hover:scale-110 transition-transform">🤿</span>
+                </div>
+                <h3 class="text-xl font-bold mb-3 group-hover:text-white">Premium Gear</h3>
+                <p class="text-slate-600 dark:text-slate-400 group-hover:text-white/90 leading-relaxed">
+                    Access high-end, safety-tested diving equipment from the world's leading brands.
+                </p>
+            </div>
+
+        </div>
+    </div>
+</section>
+<section class="py-24 bg-slate-50 dark:bg-slate-950 transition-colors duration-500">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4">Why Choose Us</h2>
+            <div class="w-24 h-1 bg-ocean-500 mx-auto rounded-full"></div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            <div class="group relative h-[400px] rounded-3xl overflow-hidden cursor-pointer shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                <img src="Assets/indeximg1" class="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700" alt="Instructors">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+                <div class="absolute bottom-0 p-6 w-full transform transition-transform duration-500">
+                    <div class="text-ocean-400 mb-3 text-3xl">🏆</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Certified Instructors</h3>
+                    <p class="text-sm text-slate-300 opacity-0 group-hover:opacity-100 h-0 group-hover:h-12 transition-all duration-500">
+                        Learn from masters with 10+ years of deep-sea experience.
+                    </p>
+                </div>
+            </div>
+
+            <div class="group relative h-[400px] rounded-3xl overflow-hidden cursor-pointer shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                <img src="Assets/indeximg2" class="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700" alt="Small Groups">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+                <div class="absolute bottom-0 p-6 w-full transition-all duration-500">
+                    <div class="text-ocean-400 mb-3 text-3xl">👥</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Small Groups</h3>
+                    <p class="text-sm text-slate-300 opacity-0 group-hover:opacity-100 h-0 group-hover:h-12 transition-all duration-500">
+                        Maximum 4 divers per instructor for personalized safety.
+                    </p>
+                </div>
+            </div>
+
+            <div class="group relative h-[400px] rounded-3xl overflow-hidden cursor-pointer shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                <img src="Assets/indeximg3" class="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700" alt="Diving Gear">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+                <div class="absolute bottom-0 p-6 w-full transition-all duration-500">
+                    <div class="text-ocean-400 mb-3 text-3xl">🛡️</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Modern Gear</h3>
+                    <p class="text-sm text-slate-300 opacity-0 group-hover:opacity-100 h-0 group-hover:h-12 transition-all duration-500">
+                        Top-tier regulators and computers serviced monthly.
+                    </p>
+                </div>
+            </div>
+
+            <div class="group relative h-[400px] rounded-3xl overflow-hidden cursor-pointer shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                <img src="Assets/indeximg4" class="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700" alt="Safety">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+                <div class="absolute bottom-0 p-6 w-full transition-all duration-500">
+                    <div class="text-ocean-400 mb-3 text-3xl">🛟</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Safety First</h3>
+                    <p class="text-sm text-slate-300 opacity-0 group-hover:opacity-100 h-0 group-hover:h-12 transition-all duration-500">
+                        Oxygen and first aid kits on every single boat trip.
+                    </p>
+                </div>
+            </div>
+
+            <div class="group relative h-[400px] rounded-3xl overflow-hidden cursor-pointer shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                <img src="Assets/indeximg5" class="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700" alt="Locations">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+                <div class="absolute bottom-0 p-6 w-full transition-all duration-500">
+                    <div class="text-ocean-400 mb-3 text-3xl">🐠</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Stunning Locations</h3>
+                    <p class="text-sm text-slate-300 opacity-0 group-hover:opacity-100 h-0 group-hover:h-12 transition-all duration-500">
+                        Exclusive access to the world's most vibrant coral reefs.
+                    </p>
+                </div>
+            </div>
+
+            <div class="group relative h-[400px] rounded-3xl overflow-hidden cursor-pointer shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                <img src="Assets/indeximg1" class="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700" alt="Instructors">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+                <div class="absolute bottom-0 p-6 w-full transform transition-transform duration-500">
+                    <div class="text-ocean-400 mb-3 text-3xl">🏆</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Certified Instructors</h3>
+                    <p class="text-sm text-slate-300 opacity-0 group-hover:opacity-100 h-0 group-hover:h-12 transition-all duration-500">
+                        Learn from masters with 10+ years of deep-sea experience.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+    <!-- <section class="py-24 bg-slate-50 dark:bg-slate-950 transition-colors duration-500">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4">Why Choose Us</h2>
+            <div class="w-24 h-1 bg-ocean-500 mx-auto rounded-full"></div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+            
+            <div class="group relative h-[400px] rounded-3xl overflow-hidden cursor-pointer shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                <img src="Assets/indeximg1" 
+                     class="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700" alt="Instructors">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+                
+                <div class="absolute bottom-0 p-6 w-full transform transition-transform duration-500">
+                    <div class="text-ocean-400 mb-3 text-3xl">🏆</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Certified Instructors</h3>
+                    <p class="text-sm text-slate-300 opacity-0 group-hover:opacity-100 h-0 group-hover:h-12 transition-all duration-500">
+                        Learn from masters with 10+ years of deep-sea experience.
+                    </p>
+                </div>
+            </div>
+
+            <div class="group relative h-[400px] rounded-3xl overflow-hidden cursor-pointer shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                <img src="Assets/indeximg2" 
+                     class="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700" alt="Small Groups">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+                
+                <div class="absolute bottom-0 p-6 w-full transition-all duration-500">
+                    <div class="text-ocean-400 mb-3 text-3xl">👥</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Small Groups</h3>
+                    <p class="text-sm text-slate-300 opacity-0 group-hover:opacity-100 h-0 group-hover:h-12 transition-all duration-500">
+                        Maximum 4 divers per instructor for personalized safety.
+                    </p>
+                </div>
+            </div>
+
+            <div class="group relative h-[400px] rounded-3xl overflow-hidden cursor-pointer shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                <img src="Assets/indeximg3" 
+                     class="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700" alt="Diving Gear">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+                
+                <div class="absolute bottom-0 p-6 w-full transition-all duration-500">
+                    <div class="text-ocean-400 mb-3 text-3xl">🛡️</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Modern Gear</h3>
+                    <p class="text-sm text-slate-300 opacity-0 group-hover:opacity-100 h-0 group-hover:h-12 transition-all duration-500">
+                        Top-tier regulators and computers serviced monthly.
+                    </p>
+                </div>
+            </div>
+
+            <div class="group relative h-[400px] rounded-3xl overflow-hidden cursor-pointer shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                <img src="Assets/indeximg4" 
+                     class="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700" alt="Safety">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+                
+                <div class="absolute bottom-0 p-6 w-full transition-all duration-500">
+                    <div class="text-ocean-400 mb-3 text-3xl">🛟</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Safety First</h3>
+                    <p class="text-sm text-slate-300 opacity-0 group-hover:opacity-100 h-0 group-hover:h-12 transition-all duration-500">
+                        Oxygen and first aid kits on every single boat trip.
+                    </p>
+                </div>
+            </div>
+
+            <div class="group relative h-[400px] rounded-3xl overflow-hidden cursor-pointer shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                <img src="Assets/indeximg5" 
+                     class="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700" alt="Locations">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+                
+                <div class="absolute bottom-0 p-6 w-full transition-all duration-500">
+                    <div class="text-ocean-400 mb-3 text-3xl">🐠</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Stunning Locations</h3>
+                    <p class="text-sm text-slate-300 opacity-0 group-hover:opacity-100 h-0 group-hover:h-12 transition-all duration-500">
+                        Exclusive access to the world's most vibrant coral reefs.
+                    </p>
+                </div>
+            </div>
+             <div class="group relative h-[400px] rounded-3xl overflow-hidden cursor-pointer shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                <img src="Assets/indeximg1" 
+                     class="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700" alt="Instructors">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+                
+                <div class="absolute bottom-0 p-6 w-full transform transition-transform duration-500">
+                    <div class="text-ocean-400 mb-3 text-3xl">🏆</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Certified Instructors</h3>
+                    <p class="text-sm text-slate-300 opacity-0 group-hover:opacity-100 h-0 group-hover:h-12 transition-all duration-500">
+                        Learn from masters with 10+ years of deep-sea experience.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section> -->
+
+    <section class="py-24 max-w-7xl mx-auto px-6 overflow-hidden">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
+        <div>
+            <h2 class="text-4xl font-bold dark:text-white">Our Services</h2>
+            <p class="mt-2 text-slate-500 dark:text-slate-400 text-lg">From zero to pro, we guide you all the way.</p>
+        </div>
+        <a href="#" class="text-ocean-500 font-bold flex items-center gap-2 group">
+            View All Services 
+            <span class="group-hover:translate-x-2 transition-transform">→</span>
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        
+        <div class="group relative overflow-hidden rounded-3xl bg-slate-100 dark:bg-slate-800 h-[450px] cursor-pointer shadow-lg">
+            <img src="Assets/indeximg6" 
+                 class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Beginner">
+            
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80 transition-opacity group-hover:opacity-90"></div>
+
+            <div class="absolute inset-0 p-8 flex flex-col justify-end translate-y-8 group-hover:translate-y-0 transition-transform duration-500">
+                <h3 class="text-2xl font-bold text-white mb-2">Beginner Courses</h3>
+                <p class="text-slate-200 opacity-0 group-hover:opacity-100 transition-opacity duration-500 mb-6">
+                    Start your journey with Discover Scuba or Open Water certifications in a safe environment.
+                </p>
+                <div class="w-12 h-12 rounded-full bg-ocean-500 text-white flex items-center justify-center self-end translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="group relative overflow-hidden rounded-3xl bg-slate-100 dark:bg-slate-800 h-[450px] cursor-pointer shadow-lg">
+            <img src="Assets/indeximg7" 
+                 class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Advanced">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80"></div>
+            <div class="absolute inset-0 p-8 flex flex-col justify-end translate-y-8 group-hover:translate-y-0 transition-transform duration-500">
+                <h3 class="text-2xl font-bold text-white mb-2">Advanced Programs</h3>
+                <p class="text-slate-200 opacity-0 group-hover:opacity-100 transition-opacity duration-500 mb-6">
+                    Master navigation, deep diving, and buoyancy control with expert-led training.
+                </p>
+                <div class="w-12 h-12 rounded-full bg-ocean-500 text-white flex items-center justify-center self-end translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="group relative overflow-hidden rounded-3xl bg-slate-100 dark:bg-slate-800 h-[450px] cursor-pointer shadow-lg">
+            <img src="Assets/indeximg8" 
+                 class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Tours">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80"></div>
+            <div class="absolute inset-0 p-8 flex flex-col justify-end translate-y-8 group-hover:translate-y-0 transition-transform duration-500">
+                <h3 class="text-2xl font-bold text-white mb-2">Guided Dive Tours</h3>
+                <p class="text-slate-200 opacity-0 group-hover:opacity-100 transition-opacity duration-500 mb-6">
+                    Explore breathtaking reefs, historical wrecks, and witness nocturnal marine wildlife.
+                </p>
+                <div class="w-12 h-12 rounded-full bg-ocean-500 text-white flex items-center justify-center self-end translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="group relative overflow-hidden rounded-3xl bg-slate-100 dark:bg-slate-800 h-[450px] cursor-pointer shadow-lg">
+            <img src="Assets/indeximg9" 
+                 class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Equipment">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80"></div>
+            <div class="absolute inset-0 p-8 flex flex-col justify-end translate-y-8 group-hover:translate-y-0 transition-transform duration-500">
+                <h3 class="text-2xl font-bold text-white mb-2">Equipment Rental</h3>
+                <p class="text-slate-200 opacity-0 group-hover:opacity-100 transition-opacity duration-500 mb-6">
+                    Professional, safety-tested scuba gear available for daily or weekly rentals.
+                </p>
+                <div class="w-12 h-12 rounded-full bg-ocean-500 text-white flex items-center justify-center self-end translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+<section class="py-24 bg-white dark:bg-slate-900 transition-colors duration-500 overflow-hidden">
+    <div class="max-w-7xl mx-auto px-6">
+        
+        <div class="flex flex-col md:flex-row justify-between items-center mb-16 text-center md:text-left gap-6">
+            <div class="max-w-2xl">
+                <h2 class="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white mb-4">
+                    Explore Our <span class="text-ocean-500">Dive Locations</span>
+                </h2>
+                <p class="text-lg text-slate-600 dark:text-slate-400">
+                    Discover breathtaking underwater destinations with crystal-clear waters and diverse marine ecosystems across the globe.
+                </p>
+            </div>
+            <button class="px-8 py-3 border-2 border-ocean-500 text-ocean-500 font-bold rounded-full hover:bg-ocean-500 hover:text-white transition-all duration-300">
+                View All Destinations
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            <div class="group relative h-[450px] rounded-[2rem] overflow-hidden shadow-2xl cursor-pointer">
+                <img src="Assets/indeximg10" 
+                     class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-125" alt="Great Barrier Reef">
+                
+                <div class="absolute top-6 left-6 z-20">
+                    <span class="bg-white/20 backdrop-blur-md text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest border border-white/30">
+                        Australia
+                    </span>
+                </div>
+
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent opacity-90"></div>
+                
+                <div class="absolute bottom-0 p-8 w-full transition-transform duration-500 transform group-hover:-translate-y-2">
+                    <h3 class="text-2xl font-bold text-white mb-2">Great Barrier Reef</h3>
+                    <p class="text-ocean-300 font-medium mb-4 flex items-center gap-2">
+                        <span>🪸</span> Vibrant Corals & Clownfish
+                    </p>
+                    <div class="h-0 opacity-0 group-hover:h-auto group-hover:opacity-100 transition-all duration-500">
+                        <p class="text-sm text-slate-300 mb-6">Explore the world's largest coral reef system, home to thousands of species of marine life.</p>
+                        <span class="text-white font-bold text-sm underline decoration-ocean-500 underline-offset-4">Explore Dive Site</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="group relative h-[450px] rounded-[2rem] overflow-hidden shadow-2xl cursor-pointer">
+                <img src="Assets/indexhero" 
+                     class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-125" alt="Red Sea">
+                
+                <div class="absolute top-6 left-6 z-20">
+                    <span class="bg-white/20 backdrop-blur-md text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest border border-white/30">
+                        Egypt
+                    </span>
+                </div>
+
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent opacity-90"></div>
+                
+                <div class="absolute bottom-0 p-8 w-full transition-transform duration-500 transform group-hover:-translate-y-2">
+                    <h3 class="text-2xl font-bold text-white mb-2">SS Thistlegorm Wreck</h3>
+                    <p class="text-ocean-300 font-medium mb-4 flex items-center gap-2">
+                        <span>🚢</span> Historic Shipwrecks
+                    </p>
+                    <div class="h-0 opacity-0 group-hover:h-auto group-hover:opacity-100 transition-all duration-500">
+                        <p class="text-sm text-slate-300 mb-6">Dive into history with one of the most famous wreck dives in the world, featuring WWII artifacts.</p>
+                        <span class="text-white font-bold text-sm underline decoration-ocean-500 underline-offset-4">Explore Dive Site</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="group relative h-[450px] rounded-[2rem] overflow-hidden shadow-2xl cursor-pointer">
+                <img src="Assets/indeximg11" 
+                     class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-125" alt="Galapagos">
+                
+                <div class="absolute top-6 left-6 z-20">
+                    <span class="bg-white/20 backdrop-blur-md text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest border border-white/30">
+                        Ecuador
+                    </span>
+                </div>
+
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent opacity-90"></div>
+                
+                <div class="absolute bottom-0 p-8 w-full transition-transform duration-500 transform group-hover:-translate-y-2">
+                    <h3 class="text-2xl font-bold text-white mb-2">Galápagos Islands</h3>
+                    <p class="text-ocean-300 font-medium mb-4 flex items-center gap-2">
+                        <span>🦈</span> Hammerhead Sharks
+                    </p>
+                    <div class="h-0 opacity-0 group-hover:h-auto group-hover:opacity-100 transition-all duration-500">
+                        <p class="text-sm text-slate-300 mb-6">Witness incredible biodiversity, including schools of hammerhead sharks and playful sea lions.</p>
+                        <span class="text-white font-bold text-sm underline decoration-ocean-500 underline-offset-4">Explore Dive Site</span>
+                    </div>
+                </div>
+            </div>
+            <div class="group relative h-[450px] rounded-[2rem] overflow-hidden shadow-2xl cursor-pointer">
+                <img src="Assets/indeximg13" 
+                     class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-125" alt="Great Blue Hole">
+                
+                <div class="absolute top-6 left-6 z-20">
+                    <span class="bg-white/20 backdrop-blur-md text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest border border-white/30">
+                        Belize
+                    </span>
+                </div>
+
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent opacity-90"></div>
+                
+                <div class="absolute bottom-0 p-8 w-full transition-transform duration-500 transform group-hover:-translate-y-2">
+                    <h3 class="text-2xl font-bold text-white mb-2">The Great Blue Hole</h3>
+                    <p class="text-ocean-300 font-medium mb-4 flex items-center gap-2">
+                        <span>🕳️</span> Deep Sinkholes & Sharks
+                    </p>
+                    <div class="h-0 opacity-0 group-hover:h-auto group-hover:opacity-100 transition-all duration-500">
+                        <p class="text-sm text-slate-300 mb-6">A world-class destination for experienced divers seeking stalactites and deep-water shark sightings.</p>
+                        <span class="text-white font-bold text-sm underline decoration-ocean-500 underline-offset-4">Explore Dive Site</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="group relative h-[450px] rounded-[2rem] overflow-hidden shadow-2xl cursor-pointer">
+                <img src="Assets/indeximg14" 
+                     class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-125" alt="Raja Ampat">
+                
+                <div class="absolute top-6 left-6 z-20">
+                    <span class="bg-white/20 backdrop-blur-md text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest border border-white/30">
+                        Indonesia
+                    </span>
+                </div>
+
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent opacity-90"></div>
+                
+                <div class="absolute bottom-0 p-8 w-full transition-transform duration-500 transform group-hover:-translate-y-2">
+                    <h3 class="text-2xl font-bold text-white mb-2">Raja Ampat</h3>
+                    <p class="text-ocean-300 font-medium mb-4 flex items-center gap-2">
+                        <span>🌀</span> Marine Biodiversity Epicenter
+                    </p>
+                    <div class="h-0 opacity-0 group-hover:h-auto group-hover:opacity-100 transition-all duration-500">
+                        <p class="text-sm text-slate-300 mb-6">Dive the richest reefs on Earth, home to 75% of all known coral species and massive manta rays.</p>
+                        <span class="text-white font-bold text-sm underline decoration-ocean-500 underline-offset-4">Explore Dive Site</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="group relative h-[450px] rounded-[2rem] overflow-hidden shadow-2xl cursor-pointer">
+                <img src="Assets/indeximg15" 
+                     class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-125" alt="Silfra Fissure">
+                
+                <div class="absolute top-6 left-6 z-20">
+                    <span class="bg-white/20 backdrop-blur-md text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest border border-white/30">
+                        Iceland
+                    </span>
+                </div>
+
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent opacity-90"></div>
+                
+                <div class="absolute bottom-0 p-8 w-full transition-transform duration-500 transform group-hover:-translate-y-2">
+                    <h3 class="text-2xl font-bold text-white mb-2">Silfra Fissure</h3>
+                    <p class="text-ocean-300 font-medium mb-4 flex items-center gap-2">
+                        <span>❄️</span> Crystal Clear Tectonic Gap
+                    </p>
+                    <div class="h-0 opacity-0 group-hover:h-auto group-hover:opacity-100 transition-all duration-500">
+                        <p class="text-sm text-slate-300 mb-6">Dive between the North American and Eurasian tectonic plates in the clearest water on Earth.</p>
+                        <span class="text-white font-bold text-sm underline decoration-ocean-500 underline-offset-4">Explore Dive Site</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<section class="py-24 bg-slate-50 dark:bg-slate-950 transition-colors duration-500">
+    <div class="max-w-7xl mx-auto px-6">
+        
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4">Meet Your Instructors</h2>
+            <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+                Learn scuba diving from internationally certified experts with thousands of logged dives and a passion for ocean safety.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            
+            <div class="group relative h-[500px] rounded-[2.5rem] overflow-hidden shadow-xl bg-white dark:bg-slate-900">
+                <img src="Assets/indeximg16" 
+                     class="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt="Lead Instructor">
+                
+                <div class="absolute top-6 right-6 z-20">
+                    <span class="bg-ocean-500 text-white px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg">
+                        Master Instructor
+                    </span>
+                </div>
+
+                <div class="absolute inset-0 bg-gradient-to-t from-ocean-900 via-transparent to-transparent opacity-60 group-hover:opacity-90 transition-opacity"></div>
+                
+                <div class="absolute inset-x-0 bottom-0 p-8 translate-y-6 group-hover:translate-y-0 transition-transform duration-500">
+                    <h3 class="text-2xl font-bold text-white mb-1">Marcus Thorne</h3>
+                    <p class="text-ocean-300 text-sm font-medium mb-4">15+ Years Experience</p>
+                    
+                    <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">
+                        <p class="text-slate-300 text-sm mb-6">Specializes in Technical Wreck Diving and Deep Sea Navigation.</p>
+                        <div class="flex gap-4">
+                            <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-ocean-500 transition-colors">
+                                <span class="text-white text-xs font-bold">IG</span>
+                            </a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-ocean-500 transition-colors">
+                                <span class="text-white text-xs font-bold">LN</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="group relative h-[500px] rounded-[2.5rem] overflow-hidden shadow-xl bg-white dark:bg-slate-900">
+                <img src="Assets/indeximg17" 
+                     class="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt="Dive Instructor">
+                
+                <div class="absolute top-6 right-6 z-20">
+                    <span class="bg-blue-600 text-white px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg">
+                        Marine Biologist
+                    </span>
+                </div>
+
+                <div class="absolute inset-0 bg-gradient-to-t from-blue-900 via-transparent to-transparent opacity-60 group-hover:opacity-90 transition-opacity"></div>
+                
+                <div class="absolute inset-x-0 bottom-0 p-8 translate-y-6 group-hover:translate-y-0 transition-transform duration-500">
+                    <h3 class="text-2xl font-bold text-white mb-1">Sarah Jenkins</h3>
+                    <p class="text-blue-300 text-sm font-medium mb-4">Photography Expert</p>
+                    
+                    <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">
+                        <p class="text-slate-300 text-sm mb-6">Expert in Underwater Macro Photography and Coral Conservation.</p>
+                        <div class="flex gap-4">
+                            <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-blue-600 transition-colors">
+                                <span class="text-white text-xs font-bold">IG</span>
+                            </a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-blue-600 transition-colors">
+                                <span class="text-white text-xs font-bold">FB</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="group relative h-[500px] rounded-[2.5rem] overflow-hidden shadow-xl bg-white dark:bg-slate-900">
+                <img src="Assets/indeximg18" 
+                     class="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt="Dive Instructor">
+                
+                <div class="absolute top-6 right-6 z-20">
+                    <span class="bg-cyan-500 text-white px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg">
+                        Safety Officer
+                    </span>
+                </div>
+
+                <div class="absolute inset-0 bg-gradient-to-t from-cyan-900 via-transparent to-transparent opacity-60 group-hover:opacity-90 transition-opacity"></div>
+                
+                <div class="absolute inset-x-0 bottom-0 p-8 translate-y-6 group-hover:translate-y-0 transition-transform duration-500">
+                    <h3 class="text-2xl font-bold text-white mb-1">David Chen</h3>
+                    <p class="text-cyan-300 text-sm font-medium mb-4">Rescue Specialist</p>
+                    
+                    <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">
+                        <p class="text-slate-300 text-sm mb-6">Certified Emergency First Response (EFR) trainer and safety lead.</p>
+                        <div class="flex gap-4">
+                            <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-cyan-500 transition-colors">
+                                <span class="text-white text-xs font-bold">LN</span>
+                            </a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-cyan-500 transition-colors">
+                                <span class="text-white text-xs font-bold">YT</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="group relative h-[500px] rounded-[2.5rem] overflow-hidden shadow-xl bg-white dark:bg-slate-900">
+                <img src="Assets/indeximg19" 
+                     class="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt="Dive Instructor">
+                
+                <div class="absolute top-6 right-6 z-20">
+                    <span class="bg-emerald-500 text-white px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg">
+                        Eco Ambassador
+                    </span>
+                </div>
+
+                <div class="absolute inset-0 bg-gradient-to-t from-emerald-900 via-transparent to-transparent opacity-60 group-hover:opacity-90 transition-opacity"></div>
+                
+                <div class="absolute inset-x-0 bottom-0 p-8 translate-y-6 group-hover:translate-y-0 transition-transform duration-500">
+                    <h3 class="text-2xl font-bold text-white mb-1">Elena Rossi</h3>
+                    <p class="text-emerald-300 text-sm font-medium mb-4">Master Diver</p>
+                    
+                    <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">
+                        <p class="text-slate-300 text-sm mb-6">Passionate about plastic-free oceans and eco-diving techniques.</p>
+                        <div class="flex gap-4">
+                            <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-emerald-500 transition-colors">
+                                <span class="text-white text-xs font-bold">IG</span>
+                            </a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-emerald-500 transition-colors">
+                                <span class="text-white text-xs font-bold">TW</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+    <section class="py-20 bg-ocean-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center gap-12">
+            <div class="flex-1">
+                <h2 class="text-4xl font-bold mb-6">Ocean Conservation</h2>
+                <p class="text-xl opacity-80 mb-8">We promote eco-friendly diving and actively support marine conservation awareness programs. Protecting the blue is our duty.</p>
+                <button class="bg-white text-ocean-900 px-8 py-3 rounded-full font-bold">Join Our Mission</button>
+            </div>
+            <div class="flex-1">
+                <img src="Assets/indeximg20" class="rounded-3xl shadow-2xl">
+            </div>
+        </div>
+    </section>
+    <section class="py-24 bg-white dark:bg-slate-900 transition-colors duration-500 overflow-hidden">
+    <div class="max-w-7xl mx-auto px-6">
+        
+        <div class="max-w-3xl mb-16">
+            <h2 class="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6">
+                What Our <span class="text-ocean-500">Divers Say</span>
+            </h2>
+            <p class="text-lg text-slate-600 dark:text-slate-400">
+                Divers trust our center for safe training, professional instructors, and unforgettable underwater experiences. Here are some of their stories.
+            </p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            
+    <div class="group relative p-8 rounded-[2rem] bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 transition-all duration-500 hover:shadow-2xl hover:shadow-ocean-500/10 hover:-translate-y-2">
+        <div class="absolute -top-4 -right-4 w-12 h-12 bg-ocean-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg group-hover:animate-bounce">
+            “
+        </div>
+        
+        <div class="flex items-center gap-4 mb-6">
+            <div class="relative">
+                <img src="Assets/indeximg21" class="w-16 h-16 rounded-full object-cover border-2 border-ocean-500 p-0.5" alt="Diver">
+                <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full"></div>
+            </div>
+            <div>
+                <h4 class="font-bold text-slate-900 dark:text-white">James Wilson</h4>
+                <p class="text-xs text-ocean-500 font-bold uppercase tracking-widest">Advanced Diver</p>
+            </div>
+        </div>
+
+        <p class="text-slate-600 dark:text-slate-300 italic leading-relaxed">
+            "The instructors here are top-notch. I went from being nervous about breathing underwater to completing my Advanced Open Water with total confidence. Truly life-changing!"
+        </p>
+
+        <div class="mt-6 flex text-yellow-400">
+            ★★★★★
+        </div>
+    </div>
+
+    <div class="group relative p-8 rounded-[2rem] bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 transition-all duration-500 hover:shadow-2xl hover:shadow-ocean-500/10 hover:-translate-y-2">
+        <div class="absolute -top-4 -right-4 w-12 h-12 bg-ocean-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg group-hover:animate-bounce">
+            “
+        </div>
+        
+        <div class="flex items-center gap-4 mb-6">
+            <div class="relative">
+                <img src="Assets/indeximg22" class="w-16 h-16 rounded-full object-cover border-2 border-ocean-500 p-0.5" alt="Diver">
+                <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full"></div>
+            </div>
+            <div>
+                <h4 class="font-bold text-slate-900 dark:text-white">Emma Thompson</h4>
+                <p class="text-xs text-ocean-500 font-bold uppercase tracking-widest">Beginner Diver</p>
+            </div>
+        </div>
+
+        <p class="text-slate-600 dark:text-slate-300 italic leading-relaxed">
+            "I was worried about safety, but the 'Safety First' approach here is real. The equipment was brand new, and the small group size meant I had constant attention."
+        </p>
+
+        <div class="mt-6 flex text-yellow-400">
+            ★★★★★
+        </div>
+    </div>
+
+    <div class="group relative p-8 rounded-[2rem] bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 transition-all duration-500 hover:shadow-2xl hover:shadow-ocean-500/10 hover:-translate-y-2">
+        <div class="absolute -top-4 -right-4 w-12 h-12 bg-ocean-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg group-hover:animate-bounce">
+            “
+        </div>
+        
+        <div class="flex items-center gap-4 mb-6">
+            <div class="relative">
+                <img src="Assets/indeximg23" class="w-16 h-16 rounded-full object-cover border-2 border-ocean-500 p-0.5" alt="Diver">
+                <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full"></div>
+            </div>
+            <div>
+                <h4 class="font-bold text-slate-900 dark:text-white">Arjun Kumar</h4>
+                <p class="text-xs text-ocean-500 font-bold uppercase tracking-widest">Rescue Diver</p>
+            </div>
+        </div>
+
+        <p class="text-slate-600 dark:text-slate-300 italic leading-relaxed">
+            "Exploring the Red Sea wrecks with this team was the highlight of my year. Their knowledge of local marine life and wreck history is unmatched!"
+        </p>
+
+        <div class="mt-6 flex text-yellow-400">
+            ★★★★★
+        </div>
+    </div>
+
+    <div class="group relative p-8 rounded-[2rem] bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 transition-all duration-500 hover:shadow-2xl hover:shadow-ocean-500/10 hover:-translate-y-2">
+        <div class="absolute -top-4 -right-4 w-12 h-12 bg-ocean-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg group-hover:animate-bounce">
+            “
+        </div>
+        
+        <div class="flex items-center gap-4 mb-6">
+            <div class="relative">
+                <img src="Assets/indeximg21" class="w-16 h-16 rounded-full object-cover border-2 border-ocean-500 p-0.5" alt="Diver">
+                <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full"></div>
+            </div>
+            <div>
+                <h4 class="font-bold text-slate-900 dark:text-white">James Wilson</h4>
+                <p class="text-xs text-ocean-500 font-bold uppercase tracking-widest">Advanced Diver</p>
+            </div>
+        </div>
+
+        <p class="text-slate-600 dark:text-slate-300 italic leading-relaxed">
+            "The instructors here are top-notch. I went from being nervous about breathing underwater to completing my Advanced Open Water with total confidence. Truly life-changing!"
+        </p>
+
+        <div class="mt-6 flex text-yellow-400">
+            ★★★★★
+        </div>
+    </div>
+
+</div>
+        <!-- <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            <div class="group relative p-8 rounded-[2rem] bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 transition-all duration-500 hover:shadow-2xl hover:shadow-ocean-500/10 hover:-translate-y-2">
+                <div class="absolute -top-4 -right-4 w-12 h-12 bg-ocean-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg group-hover:animate-bounce">
+                    “
+                </div>
+                
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="relative">
+                        <img src="Assets/indeximg21" 
+                             class="w-16 h-16 rounded-full object-cover border-2 border-ocean-500 p-0.5" alt="Diver">
+                        <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full"></div>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-900 dark:text-white">James Wilson</h4>
+                        <p class="text-xs text-ocean-500 font-bold uppercase tracking-widest">Advanced Diver</p>
+                    </div>
+                </div>
+
+                <p class="text-slate-600 dark:text-slate-300 italic leading-relaxed">
+                    "The instructors here are top-notch. I went from being nervous about breathing underwater to completing my Advanced Open Water with total confidence. Truly life-changing!"
+                </p>
+
+                <div class="mt-6 flex text-yellow-400">
+                    ★★★★★
+                </div>
+            </div>
+
+            <div class="group relative p-8 rounded-[2rem] bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 transition-all duration-500 hover:shadow-2xl hover:shadow-ocean-500/10 hover:-translate-y-2 lg:mt-8">
+                <div class="absolute -top-4 -right-4 w-12 h-12 bg-ocean-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg group-hover:animate-bounce">
+                    “
+                </div>
+                
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="relative">
+                        <img src="Assets/indeximg22" 
+                             class="w-16 h-16 rounded-full object-cover border-2 border-ocean-500 p-0.5" alt="Diver">
+                        <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full"></div>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-900 dark:text-white">Emma Thompson</h4>
+                        <p class="text-xs text-ocean-500 font-bold uppercase tracking-widest">Beginner Diver</p>
+                    </div>
+                </div>
+
+                <p class="text-slate-600 dark:text-slate-300 italic leading-relaxed">
+                    "I was worried about safety, but the 'Safety First' approach here is real. The equipment was brand new, and the small group size meant I had constant attention."
+                </p>
+
+                <div class="mt-6 flex text-yellow-400">
+                    ★★★★★
+                </div>
+            </div>
+
+            <div class="group relative p-8 rounded-[2rem] bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 transition-all duration-500 hover:shadow-2xl hover:shadow-ocean-500/10 hover:-translate-y-2">
+                <div class="absolute -top-4 -right-4 w-12 h-12 bg-ocean-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg group-hover:animate-bounce">
+                    “
+                </div>
+                
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="relative">
+                        <img src="Assets/indeximg23" 
+                             class="w-16 h-16 rounded-full object-cover border-2 border-ocean-500 p-0.5" alt="Diver">
+                        <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full"></div>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-900 dark:text-white">Arjun Kumar</h4>
+                        <p class="text-xs text-ocean-500 font-bold uppercase tracking-widest">Rescue Diver</p>
+                    </div>
+                </div>
+
+                <p class="text-slate-600 dark:text-slate-300 italic leading-relaxed">
+                    "Exploring the Red Sea wrecks with this team was the highlight of my year. Their knowledge of local marine life and wreck history is unmatched!"
+                </p>
+
+                <div class="mt-6 flex text-yellow-400">
+                    ★★★★★
+                </div>
+            </div>
+            <div class="group relative p-8 rounded-[2rem] bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 transition-all duration-500 hover:shadow-2xl hover:shadow-ocean-500/10 hover:-translate-y-2">
+                <div class="absolute -top-4 -right-4 w-12 h-12 bg-ocean-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg group-hover:animate-bounce">
+                    “
+                </div>
+                
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="relative">
+                        <img src="Assets/indeximg21" 
+                             class="w-16 h-16 rounded-full object-cover border-2 border-ocean-500 p-0.5" alt="Diver">
+                        <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full"></div>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-900 dark:text-white">James Wilson</h4>
+                        <p class="text-xs text-ocean-500 font-bold uppercase tracking-widest">Advanced Diver</p>
+                    </div>
+                </div>
+
+                <p class="text-slate-600 dark:text-slate-300 italic leading-relaxed">
+                    "The instructors here are top-notch. I went from being nervous about breathing underwater to completing my Advanced Open Water with total confidence. Truly life-changing!"
+                </p>
+
+                <div class="mt-6 flex text-yellow-400">
+                    ★★★★★
+                </div>
+            </div>
+
+        </div> -->
+    </div>
+</section>
+<section id="pricing" class="py-24 bg-white dark:bg-slate-900 transition-colors duration-500" 
+         x-data="{ annual: false }">
+    <div class="max-w-7xl mx-auto px-6">
+        
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-6 tracking-tight">
+                Transparent <span class="text-ocean-500">Pricing</span>
+            </h2>
+            <p class="text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto mb-10 font-medium">
+                Choose the right certification path for your underwater goals. No hidden fees, all gear included.
+            </p>
+
+            <div class="flex items-center justify-center gap-4">
+                <span :class="!annual ? 'text-slate-900 dark:text-white font-bold' : 'text-slate-400'" class="text-sm uppercase tracking-widest transition-colors">Per Course</span>
+                <button @click="annual = !annual" 
+                        class="w-16 h-8 rounded-full bg-slate-200 dark:bg-slate-800 relative p-1 transition-all">
+                    <div :class="annual ? 'translate-x-8 bg-ocean-500' : 'translate-x-0 bg-slate-400'" 
+                         class="w-6 h-6 rounded-full transition-transform duration-300 shadow-md"></div>
+                </button>
+                <span :class="annual ? 'text-slate-900 dark:text-white font-bold' : 'text-slate-400'" class="text-sm uppercase tracking-widest transition-colors">Season Pass</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            <div class="group relative p-8 rounded-[2.5rem] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-ocean-500/50 transition-all duration-500 hover:-translate-y-4 hover:shadow-2xl hover:shadow-ocean-500/10">
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Discovery</h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">For first-time explorers.</p>
+                </div>
+                <div class="flex items-baseline gap-1 mb-8">
+                    <span class="text-4xl font-black text-slate-900 dark:text-white" x-text="annual ? '$199' : '$99'"></span>
+                    <span class="text-slate-400 text-sm font-bold uppercase tracking-widest" x-text="annual ? '/ season' : '/ course'"></span>
+                </div>
+                <ul class="space-y-4 mb-10">
+                    <li class="flex items-center gap-3 text-slate-600 dark:text-slate-300 font-medium">
+                        <span class="w-1.5 h-1.5 rounded-full bg-ocean-500"></span> 2 Hour Pool Session
+                    </li>
+                    <li class="flex items-center gap-3 text-slate-600 dark:text-slate-300 font-medium">
+                        <span class="w-1.5 h-1.5 rounded-full bg-ocean-500"></span> Full Equipment Rental
+                    </li>
+                    <li class="flex items-center gap-3 text-slate-600 dark:text-slate-300 font-medium opacity-40">
+                        <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> International License
+                    </li>
+                </ul>
+                <a href="booking.html" class="block w-full py-4 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-center font-black text-sm uppercase tracking-widest hover:bg-ocean-500 dark:hover:bg-ocean-500 dark:hover:text-white transition-all">Select Plan</a>
+            </div>
+
+            <div class="group relative p-8 rounded-[2.5rem] bg-slate-900 dark:bg-ocean-500 shadow-2xl shadow-ocean-500/30 transition-all duration-500 hover:-translate-y-4 lg:-mt-4 lg:mb-4">
+                <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-white text-ocean-500 text-[10px] font-black uppercase tracking-[0.3em] px-6 py-2 rounded-full shadow-lg">
+                    Most Popular
+                </div>
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold text-white mb-2">Open Water</h3>
+                    <p class="text-sm text-white/70 font-medium">Global certification for life.</p>
+                </div>
+                <div class="flex items-baseline gap-1 mb-8">
+                    <span class="text-4xl font-black text-white" x-text="annual ? '$899' : '$450'"></span>
+                    <span class="text-white/60 text-sm font-bold uppercase tracking-widest" x-text="annual ? '/ season' : '/ course'"></span>
+                </div>
+                <ul class="space-y-4 mb-10">
+                    <li class="flex items-center gap-3 text-white font-medium">
+                        <span class="w-1.5 h-1.5 rounded-full bg-white"></span> 4 Open Water Dives
+                    </li>
+                    <li class="flex items-center gap-3 text-white font-medium">
+                        <span class="w-1.5 h-1.5 rounded-full bg-white"></span> PADI/SSI Certification
+                    </li>
+                    <li class="flex items-center gap-3 text-white font-medium">
+                        <span class="w-1.5 h-1.5 rounded-full bg-white"></span> Digital Learning App
+                    </li>
+                </ul>
+                <a href="booking.html" class="block w-full py-4 rounded-2xl bg-white text-ocean-500 text-center font-black text-sm uppercase tracking-widest hover:scale-105 transition-all shadow-xl">Get Certified</a>
+            </div>
+
+            <div class="group relative p-8 rounded-[2.5rem] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-ocean-500/50 transition-all duration-500 hover:-translate-y-4 hover:shadow-2xl hover:shadow-ocean-500/10">
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Advanced</h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Master deep & night dives.</p>
+                </div>
+                <div class="flex items-baseline gap-1 mb-8">
+                    <span class="text-4xl font-black text-slate-900 dark:text-white" x-text="annual ? '$1200' : '$550'"></span>
+                    <span class="text-slate-400 text-sm font-bold uppercase tracking-widest" x-text="annual ? '/ season' : '/ course'"></span>
+                </div>
+                <ul class="space-y-4 mb-10">
+                    <li class="flex items-center gap-3 text-slate-600 dark:text-slate-300 font-medium">
+                        <span class="w-1.5 h-1.5 rounded-full bg-ocean-500"></span> 5 Adventure Dives
+                    </li>
+                    <li class="flex items-center gap-3 text-slate-600 dark:text-slate-300 font-medium">
+                        <span class="w-1.5 h-1.5 rounded-full bg-ocean-500"></span> Wreck & Deep Specialty
+                    </li>
+                    <li class="flex items-center gap-3 text-slate-600 dark:text-slate-300 font-medium">
+                        <span class="w-1.5 h-1.5 rounded-full bg-ocean-500"></span> Advance Dive Slate
+                    </li>
+                </ul>
+                <a href="booking.html" class="block w-full py-4 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-center font-black text-sm uppercase tracking-widest hover:bg-ocean-500 dark:hover:bg-ocean-500 dark:hover:text-white transition-all">Select Plan</a>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+  <section class="py-24 relative overflow-hidden bg-white dark:bg-slate-900 transition-colors duration-500" 
+         x-data="{ loading: false, success: false, focused: null }">
+    
+    <div class="absolute inset-0 pointer-events-none">
+        <div class="absolute -top-24 -left-24 w-96 h-96 bg-ocean-500/5 rounded-full blur-[120px]"></div>
+        <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-blue-600/5 rounded-full blur-[120px]"></div>
+    </div>
+
+    <div class="max-w-5xl mx-auto px-6 relative z-10">
+        <div class="text-center mb-16">
+            <span class="text-ocean-500 font-bold uppercase text-[10px] tracking-[0.5em] mb-4 block">Secure your slot</span>
+            <h2 class="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-6 tracking-tight">Start Your Journey</h2>
+            <p class="text-lg text-slate-500 dark:text-slate-400 max-w-xl mx-auto font-medium">
+                Select your course and preferred date. Our team will verify availability and reach out within 2 hours.
+            </p>
+        </div>
+
+        <div class="bg-slate-50/50 dark:bg-slate-800/30 backdrop-blur-2xl p-3 rounded-[2rem] shadow-sm border border-slate-200/50 dark:border-slate-700/50">
+            <form @submit.prevent="loading = true; setTimeout(() => { loading = false; success = true }, 2000)" 
+                  class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                
+                <div class="relative group">
+                    <div :class="focused === 'course' ? 'border-ocean-500 bg-white dark:bg-slate-900 shadow-lg' : 'border-transparent bg-slate-100 dark:bg-slate-900/50'"
+                         class="transition-all duration-300 rounded-2xl border-2 p-4 h-20 flex flex-col justify-center">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-ocean-500 transition-colors">Course Level</label>
+                        <select @focus="focused = 'course'" @blur="focused = null"
+                                class="w-full bg-transparent outline-none font-bold text-slate-900 dark:text-white appearance-none cursor-pointer">
+                            <option>Open Water Diver</option>
+                            <option>Advanced Adventurer</option>
+                            <option>Rescue Specialist</option>
+                            <option>Dive Master Pro</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="relative group">
+                    <div :class="focused === 'date' ? 'border-ocean-500 bg-white dark:bg-slate-900 shadow-lg' : 'border-transparent bg-slate-100 dark:bg-slate-900/50'"
+                         class="transition-all duration-300 rounded-2xl border-2 p-4 h-20 flex flex-col justify-center">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-ocean-500 transition-colors">Preferred Date</label>
+                        <input type="date" @focus="focused = 'date'" @blur="focused = null"
+                               class="w-full bg-transparent outline-none font-bold text-slate-900 dark:text-white cursor-pointer invert-0 dark:invert-[0.8]">
+                    </div>
+                </div>
+
+                <div class="flex items-center">
+                    <button type="submit" 
+                            :disabled="loading || success"
+                            class="relative w-full h-20 overflow-hidden group/btn rounded-2xl font-black uppercase text-xs tracking-[0.2em] transition-all active:scale-95 disabled:grayscale">
+                        
+                        <div class="absolute inset-0 bg-slate-900 dark:bg-ocean-500 transition-all duration-500 group-hover/btn:bg-ocean-600"></div>
+                        
+                        <div class="absolute inset-0 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+
+                        <div class="relative z-10 flex items-center justify-center gap-3 text-white">
+                            <template x-if="loading">
+                                <svg class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            </template>
+
+                            <span x-show="!loading && !success">Confirm Availability</span>
+                            
+                            <span x-show="success" class="flex items-center gap-2 animate-bounce">
+                                Selection Received
+                            </span>
+                        </div>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="mt-12 flex flex-wrap justify-center gap-x-12 gap-y-4">
+            <div class="group flex flex-col items-center">
+                <span class="text-slate-900 dark:text-white font-black text-sm tracking-tighter transition-colors group-hover:text-ocean-500">SECURE</span>
+                <span class="text-[9px] uppercase tracking-widest text-slate-400">Encryption</span>
+            </div>
+            <div class="group flex flex-col items-center">
+                <span class="text-slate-900 dark:text-white font-black text-sm tracking-tighter transition-colors group-hover:text-ocean-500">FLEXIBLE</span>
+                <span class="text-[9px] uppercase tracking-widest text-slate-400">Scheduling</span>
+            </div>
+            <div class="group flex flex-col items-center">
+                <span class="text-slate-900 dark:text-white font-black text-sm tracking-tighter transition-colors group-hover:text-ocean-500">DIRECT</span>
+                <span class="text-[9px] uppercase tracking-widest text-slate-400">Verification</span>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="py-24 relative overflow-hidden">
+    <div class="absolute inset-0 z-0">
+        <img src="Assets/indexhero" 
+             class="w-full h-full object-cover brightness-[0.3]" alt="Underwater Background">
+        <div class="absolute inset-0 bg-ocean-900/40 backdrop-blur-[2px]"></div>
+    </div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-6">
+        <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-[3rem] p-8 md:p-16 overflow-hidden relative group">
+            
+            <div class="absolute -top-[50%] -left-[50%] w-[200%] h-[200%] bg-[conic-gradient(from_0deg,transparent,rgba(14,165,233,0.3),transparent)] animate-[spin_10s_linear_infinite] pointer-events-none"></div>
+
+            <div class="relative z-20 flex flex-col lg:flex-row items-center justify-between gap-12">
+                <div class="text-center lg:text-left max-w-2xl">
+                    <h2 class="text-4xl md:text-6xl font-black text-white mb-6 leading-tight">
+                        Ready to Breathe <br/> 
+                        <span class="text-ocean-400">Underwater?</span>
+                    </h2>
+                    <p class="text-xl text-slate-200 mb-8 opacity-90 leading-relaxed">
+                        Join 10,000+ divers who started their journey with us. Global certifications, expert instructors, and the world's best dive sites await.
+                    </p>
+                    
+                    <div class="flex flex-wrap justify-center lg:justify-start gap-4 mb-4">
+                        <span class="flex items-center gap-2 text-white/80 text-sm font-medium">
+                            <svg class="w-5 h-5 text-ocean-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                            PADI Certified
+                        </span>
+                        <span class="flex items-center gap-2 text-white/80 text-sm font-medium">
+                            <svg class="w-5 h-5 text-ocean-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                            Free Gear Rental
+                        </span>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+                    <a href="login.html" class="group/btn relative px-10 py-5 bg-ocean-500 text-white rounded-2xl font-black text-center text-lg transition-all hover:bg-ocean-400 hover:shadow-[0_0_30px_rgba(14,165,233,0.5)] active:scale-95">
+                        Get Certified Now
+                        <!-- <div class="absolute inset-0 rounded-2xl bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300"></div> -->
+                    </a>
+                    <a href="contact.html" class="px-10 py-5 bg-white text-ocean-900 rounded-2xl font-black text-center text-lg transition-all hover:bg-slate-100 active:scale-95">
+                        Contact Support
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+   <footer class="bg-slate-50 dark:bg-slate-950 pt-20 pb-10 border-t dark:border-slate-800 transition-colors duration-500">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8">
+            
+            <div class="lg:col-span-2">
+                <a href="index.html">
+ <div class="flex items-center gap-2 mb-6">
+                    <div class="w-10 h-10 bg-ocean-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-ocean-500/20">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+                    </div>
+                    <span class="text-xl lg:text-2xl font-black tracking-tighter bg-gradient-to-r from-blue-600 to-ocean-400 bg-clip-text text-transparent uppercase italic">DeepBlue</span>
+                </div>
+                </a>
+               
+                <p class="text-slate-500 dark:text-slate-400 max-w-sm mb-8 leading-relaxed">
+                    Providing world-class scuba diving training and global certifications since 2015. Our mission is to explore the blue safely and sustainably.
+                </p>
+                <div class="flex flex-wrap gap-4">
+    <a href="#" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-ocean-500 hover:text-white hover:border-ocean-500 hover:-translate-y-1 transition-all shadow-sm">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
+    </a>
+
+    <a href="#" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-ocean-500 hover:text-white hover:border-ocean-500 hover:-translate-y-1 transition-all shadow-sm">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+    </a>
+
+    <a href="#" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-ocean-500 hover:text-white hover:border-ocean-500 hover:-translate-y-1 transition-all shadow-sm">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M22.675 0h-21.35C.597 0 0 .597 0 1.326v21.348C0 23.403.597 24 1.325 24H12.82v-9.294H9.692v-3.622h3.128V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12V24h6.116c.73 0 1.325-.597 1.325-1.326V1.326C24 .597 23.403 0 22.675 0z"/></svg>
+    </a>
+
+    
+
+    <a href="#" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-ocean-500 hover:text-white hover:border-ocean-500 hover:-translate-y-1 transition-all shadow-sm">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+    </a>
+
+    
+</div>
+            </div>
+
+            <div>
+                <h4 class="font-black text-xs uppercase tracking-[0.2em] text-slate-900 dark:text-white mb-6">Navigation</h4>
+                <ul class="space-y-4">
+                    <li><a href="index.html" class="text-slate-500 dark:text-slate-400 hover:text-ocean-500 transition-colors font-medium">Home</a></li>
+                    <li><a href="home2.html" class="text-slate-500 dark:text-slate-400 hover:text-ocean-500 transition-colors font-medium">Home2</a></li>
+                    <li><a href="course.html" class="text-slate-500 dark:text-slate-400 hover:text-ocean-500 transition-colors font-medium">Our Courses</a></li>
+                    <li><a href="Instructors.html" class="text-slate-500 dark:text-slate-400 hover:text-ocean-500 transition-colors font-medium">Meet Instructors</a></li>
+                    <li><a href="about.html" class="text-slate-500 dark:text-slate-400 hover:text-ocean-500 transition-colors font-medium">Equipment Resources</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-black text-xs uppercase tracking-[0.2em] text-slate-900 dark:text-white mb-6">Quick Links</h4>
+                <ul class="space-y-4">
+                    <li><a href="about.html" class="text-slate-500 dark:text-slate-400 hover:text-ocean-500 transition-colors font-medium">About Us</a></li>
+                    <li><a href="contact.html" class="text-slate-500 dark:text-slate-400 hover:text-ocean-500 transition-colors font-medium">Contact Center</a></li>
+                    <li><a href="comingsoon.html" class="text-slate-500 dark:text-slate-400 hover:text-ocean-500 transition-colors font-medium">Coming Soon</a></li>
+                    <li><a href="#" class="text-slate-500 dark:text-slate-400 hover:text-ocean-500 transition-colors font-medium flex items-center gap-2">
+                        System Status <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                    </a></li>
+                    <li><a href="404.html" class="text-slate-500 dark:text-slate-400 hover:text-ocean-500 transition-colors font-medium">404 Error Page</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-black text-xs uppercase tracking-[0.2em] text-slate-900 dark:text-white mb-6">Weekly Briefing</h4>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mb-4 font-medium">Get dive tips and trip alerts.</p>
+                <div class="relative group">
+                    <input type="email" placeholder="Your email address" 
+                           class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-xl outline-none focus:border-ocean-500 transition-all text-sm font-medium">
+                    <button class="absolute right-2 top-2 bottom-2 bg-ocean-500 text-white px-4 rounded-lg hover:bg-ocean-600 transition-colors font-bold">
+                        Join
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-20 pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6">
+            <p class="text-xs font-bold uppercase tracking-widest text-slate-400">
+                © 2026 DeepBlue Diving Center. All rights reserved.
+            </p>
+            <div class="flex gap-8">
+                <a href="#" class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-ocean-500 transition-colors">Privacy Policy</a>
+                <a href="#" class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-ocean-500 transition-colors">Terms of Service</a>
+                <a href="#" class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-ocean-500 transition-colors">Cookie Settings</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>
